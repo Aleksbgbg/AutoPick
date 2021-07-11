@@ -9,25 +9,37 @@
     {
         private readonly Config _config;
 
+        private readonly PerStateActionExecutor _actionExecutor;
+
+        private readonly IStateConsumer _stateConsumer;
+
         private WindowManipulator? _windowManipulator;
 
         private bool _enabled = true;
 
-        private AutoPicker(Config config)
+        private AutoPicker(Config config, PerStateActionExecutor actionExecutor, IStateConsumer stateConsumer)
         {
             _config = config;
+            _actionExecutor = actionExecutor;
+            _stateConsumer = stateConsumer;
         }
 
         public static AutoPicker Run(IUserConfiguration userConfiguration, IStateConsumer stateConsumer)
         {
-            AutoPicker autoPicker = new(new Config());
-            Task.Factory.StartNew(async () => await autoPicker.LoopThread(userConfiguration, stateConsumer),
-                                  TaskCreationOptions.LongRunning);
+            PerStateActionExecutor perStateActionExecutor = new();
+            perStateActionExecutor.RegisterAction(State.Accept, new AcceptStateActionExecutor());
+            perStateActionExecutor.RegisterAction(State.Pick, new PickStateActionExecutor(userConfiguration));
+            perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
+            perStateActionExecutor.RegisterAction(State.Locked, new LockedStateActionExecutor(userConfiguration));
+
+            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, stateConsumer);
+            Task.Factory.StartNew(autoPicker.LoopThread, TaskCreationOptions.LongRunning);
+
             return autoPicker;
         }
 
     #if DEBUG
-        public event EventHandler? DetectionFinished;
+        public event EventHandler? FinishedExecution;
     #endif
 
         public void Enable()
@@ -40,24 +52,22 @@
             _enabled = false;
         }
 
-        private async Task LoopThread(IUserConfiguration userConfiguration, IStateConsumer stateConsumer)
+        private async Task LoopThread()
         {
             try
             {
-                PerStateActionExecutor perStateActionExecutor = new();
-                perStateActionExecutor.RegisterAction(State.Accept, new AcceptStateActionExecutor());
-                perStateActionExecutor.RegisterAction(State.Pick, new PickStateActionExecutor(userConfiguration));
-                perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
-                perStateActionExecutor.RegisterAction(State.Locked, new LockedStateActionExecutor(userConfiguration));
-
                 while (true)
                 {
                     State state = _enabled ? DetectState() : State.Disabled;
-                    await perStateActionExecutor.ExecuteAction(state, _windowManipulator!);
-                    stateConsumer.Consume(state);
+
+                    Task action = RunTakeActionThread(state);
+                    RunStateReportThread(state);
+                    await action;
+
                 #if DEBUG
-                    DetectionFinished?.Invoke(this, EventArgs.Empty);
+                    FinishedExecution?.Invoke(this, EventArgs.Empty);
                 #endif
+
                     await NextLoopDelay(state);
                 }
             }
@@ -65,6 +75,16 @@
             {
                 ErrorReporting.ReportError(e, "AutoPicker thread loop ended unexpectedly");
             }
+        }
+
+        private Task RunTakeActionThread(State state)
+        {
+            return Task.Run(() => _actionExecutor.ExecuteAction(state, _windowManipulator!));
+        }
+
+        private Task RunStateReportThread(State state)
+        {
+            return Task.Run(() => _stateConsumer.Consume(state));
         }
 
         private State DetectState()
