@@ -1,0 +1,19 @@
+﻿<Window x:Class="AutoPick.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:AutoPick.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance viewModels:MainViewModel}"
+        ResizeMode="CanMinimize"
+        Title="AutoPick" Width="250" Height="130">
+    <StackPanel>
+        <TextBlock Text="Champion" />
+        <TextBox Text="{Binding ChampText, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="Lane" />
+        <TextBox Text="{Binding LaneText, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="{Binding State, StringFormat=State: {0}}" />
+        <Image Source="{Binding Source}" />
+    </StackPanel>
+</Window>
