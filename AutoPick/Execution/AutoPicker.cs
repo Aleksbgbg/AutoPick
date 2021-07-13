@@ -4,9 +4,13 @@
     using System.Threading.Tasks;
     using AutoPick.Debug;
     using AutoPick.StateDetection.Definition;
+    using AutoPick.Win32.Native;
 
     public class AutoPicker
     {
+        public const int DefaultWindowWidth = 1280;
+        public const int DefaultWindowHeight = 720;
+
         private readonly Config _config;
 
         private readonly PerStateActionExecutor _actionExecutor;
@@ -14,6 +18,8 @@
         private readonly IStateConsumer _stateConsumer;
 
         private WindowManipulator? _windowManipulator;
+
+        private Win32Rect _windowSize;
 
         private bool _enabled = true;
 
@@ -82,26 +88,26 @@
             return Task.Run(() => _actionExecutor.ExecuteAction(state, _windowManipulator!));
         }
 
-        private Task RunStateReportThread(State state)
+        private void RunStateReportThread(State state)
         {
-            return Task.Run(() => _stateConsumer.Consume(state));
+            Task.Run(() => _stateConsumer.Consume(state));
         }
 
         private State DetectState()
         {
-            if (WindowManipulator.HasWindow())
+            if (WindowManipulator.HasWindow(out IntPtr window))
             {
-                if (WindowManipulator.IsMinimised())
+                if (WindowManipulator.IsMinimised(window))
                 {
                     return State.Minimised;
                 }
 
-                if (WindowManipulator.IsInvalidSize())
+                if (!WindowManipulator.IsValidSize(window))
                 {
                     return State.InvalidWindowSize;
                 }
 
-                _windowManipulator ??= WindowManipulator.Create(_config);
+                _windowManipulator ??= WindowManipulator.Create(window, _config);
             }
             else
             {
@@ -113,6 +119,16 @@
 
                 return State.NotLaunched;
             }
+
+            Win32Rect currentWindowSize = WindowManipulator.GetWindowSize(window);
+
+            if ((currentWindowSize.Width != _windowSize.Width) || (currentWindowSize.Height != _windowSize.Height))
+            {
+                _windowManipulator.Delete();
+                _windowManipulator = WindowManipulator.Create(window, _config);
+            }
+
+            _windowSize = currentWindowSize;
 
             return _windowManipulator.DetectWindowState();
         }

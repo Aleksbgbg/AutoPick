@@ -18,6 +18,8 @@
 
         private readonly StateDetector _stateDetector;
 
+        private readonly ClickPoints _clickPoints;
+
         private readonly IntPtr _window;
 
         private readonly IntPtr _sourceDeviceContext;
@@ -25,35 +27,45 @@
 
         private readonly IntPtr _bitmap;
 
-        private WindowManipulator(StateDetector stateDetector, IntPtr window, IntPtr sourceDeviceContext, IntPtr targetDeviceContext, IntPtr bitmap)
+        private WindowManipulator(StateDetector stateDetector, ClickPoints clickPoints, IntPtr window, IntPtr sourceDeviceContext, IntPtr targetDeviceContext, IntPtr bitmap)
         {
             _stateDetector = stateDetector;
+            _clickPoints = clickPoints;
             _window = window;
             _sourceDeviceContext = sourceDeviceContext;
             _targetDeviceContext = targetDeviceContext;
             _bitmap = bitmap;
         }
 
-        public static bool HasWindow()
+        public static bool HasWindow(out IntPtr window)
         {
-            return FindLeagueWindow().ToInt32() != 0;
+            window = FindLeagueWindow();
+            return window.ToInt32() != 0;
         }
 
-        public static bool IsMinimised()
+        public static bool IsMinimised(IntPtr window)
         {
-            return Win32Util.IsIconic(FindLeagueWindow());
+            return Win32Util.IsIconic(window);
         }
 
-        public static bool IsInvalidSize()
+        public static Win32Rect GetWindowSize(IntPtr window)
         {
-            Win32Util.GetWindowRect(FindLeagueWindow(), out Win32Rect windowRect);
-            return (windowRect.Width != 1280) || (windowRect.Height != 720);
+            Win32Util.GetWindowRect(window, out Win32Rect windowRect);
+            return windowRect;
         }
 
-        public static WindowManipulator Create(Config config)
+        public static bool IsValidSize(IntPtr window)
         {
-            IntPtr window = FindLeagueWindow();
+            Win32Util.GetWindowRect(window, out Win32Rect windowRect);
 
+            bool widthValid = (windowRect.Width == 1280) || (windowRect.Width == 1920);
+            bool heightValid = (windowRect.Height == 720) || (windowRect.Height == 1080);
+
+            return widthValid && heightValid;
+        }
+
+        public static WindowManipulator Create(IntPtr window, Config config)
+        {
             IntPtr sourceDeviceContext = Win32Util.GetDC(window);
             IntPtr targetDeviceContext = Win32Util.CreateCompatibleDC(sourceDeviceContext);
 
@@ -62,7 +74,10 @@
             IntPtr bitmap = Win32Util.CreateCompatibleBitmap(sourceDeviceContext, windowRect.Width, windowRect.Height);
             Win32Util.SelectObject(targetDeviceContext, bitmap);
 
-            return new WindowManipulator(new StateDetector(config), window, sourceDeviceContext, targetDeviceContext, bitmap);
+            return new WindowManipulator(
+                new StateDetector(config),
+                new ClickPoints(new Size(windowRect.Width, windowRect.Height)),
+                window, sourceDeviceContext, targetDeviceContext, bitmap);
         }
 
         public void Delete()
@@ -102,8 +117,7 @@
         public Task AcceptMatch()
         {
             InputQueue inputQueue = new(_window);
-
-            inputQueue.ClickMouse(ClickPoints.AcceptButton);
+            inputQueue.ClickMouse(_clickPoints.AcceptButton);
             inputQueue.Flush();
 
             return Task.CompletedTask;
@@ -113,7 +127,7 @@
         {
             InputQueue inputQueue = new(_window);
 
-            inputQueue.ClickMouse(ClickPoints.ChatBox);
+            inputQueue.ClickMouse(_clickPoints.ChatBox);
             await FlushAndDelay(inputQueue, ShortDelayMs);
 
             inputQueue.TypeText(lane);
@@ -125,23 +139,23 @@
         {
             InputQueue inputQueue = new(_window);
 
-            inputQueue.ClickMouse(ClickPoints.SearchBox);
+            inputQueue.ClickMouse(_clickPoints.SearchBox);
             await FlushAndDelay(inputQueue, ShortDelayMs);
 
             inputQueue.TypeText(championName);
             await FlushAndDelay(inputQueue, ShortDelayMs);
 
-            inputQueue.ClickMouse(ClickPoints.FirstChampionSelectionImage);
+            inputQueue.ClickMouse(_clickPoints.FirstChampionSelectionImage);
             await FlushAndDelay(inputQueue, LongDelayMs);
 
-            inputQueue.ClickMouse(ClickPoints.LockInButton);
+            inputQueue.ClickMouse(_clickPoints.LockInButton);
             inputQueue.Flush();
         }
 
         public Task LockIn()
         {
             InputQueue inputQueue = new(_window);
-            inputQueue.ClickMouse(ClickPoints.LockInButton);
+            inputQueue.ClickMouse(_clickPoints.LockInButton);
             inputQueue.Flush();
 
             return Task.CompletedTask;

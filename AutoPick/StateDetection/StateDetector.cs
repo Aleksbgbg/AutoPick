@@ -6,8 +6,10 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using AutoPick.Execution;
     using AutoPick.StateDetection.Definition;
     using Emgu.CV;
+    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
 
     public class StateDetector
@@ -23,6 +25,17 @@
         }
 
         public State Detect(Image<Gray, byte> image)
+        {
+            if ((image.Width != AutoPicker.DefaultWindowWidth) || (image.Height != AutoPicker.DefaultWindowHeight))
+            {
+                return DetectInternal(
+                    image.Resize(AutoPicker.DefaultWindowWidth, AutoPicker.DefaultWindowHeight, Inter.Lanczos4));
+            }
+
+            return DetectInternal(image);
+        }
+
+        private State DetectInternal(Image<Gray, byte> image)
         {
             foreach (IImageRecogniser recogniser in _imageRecognisers)
             {

@@ -1,6 +1,7 @@
 ﻿namespace MockApp
 {
     using System;
+    using System.Drawing;
     using System.IO;
     using System.Net;
     using System.Net.Sockets;
@@ -8,18 +9,33 @@
     using System.Text;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Media.Imaging;
+    using Size = System.Drawing.Size;
 
     public partial class MainWindow
     {
         private const string DebugLogFile = "MockApp.debug.log";
         private const string InfoLogFile = "MockApp.info.log";
 
+        private static readonly Size DefaultResolution = new(1280, 720);
+
+        private static readonly Rectangle[] UiElementLocations =
+        {
+            new(551, 529, 178, 46), // AcceptButton
+            new(24, 667, 296, 30), // ChatBox
+            new(735, 93, 193, 22), // SearchBox
+            new(354, 132, 65, 65), // SelectChampButton
+            new(572, 591, 138, 29), // LockInButton
+        };
+
         private readonly ReadableAfterRelease<bool> _accepted = new();
         private readonly ReadableAfterRelease<bool> _selectedChamp = new();
         private readonly ReadableAfterRelease<bool> _lockedIn = new();
         private readonly ReadableAfterRelease<StringBuilder> _chatLog = new();
+
+        private int _screenId;
 
         public MainWindow()
         {
@@ -103,8 +119,10 @@
             case 27:
                 await OnUiThread(() =>
                 {
-                    Width = (data[2] << 8) | (data[1]);
-                    Height = (data[4] << 8) | (data[3]);
+                    int width = (data[2] << 8) | (data[1]);
+                    int height = (data[4] << 8) | (data[3]);
+
+                    ChangeResolution(width, height);
                 });
                 break;
             }
@@ -112,9 +130,71 @@
             return Array.Empty<byte>();
         }
 
+        private void ChangeResolution(int width, int height)
+        {
+            if (((int)Width == width) && ((int)Height == height))
+            {
+                return;
+            }
+
+            Width = width;
+            Height = height;
+
+            if (((width == 1920) || (width == 1280)) && ((height == 1080) || (height == 720)))
+            {
+                Size newResolution = new(width, height);
+
+                ChangePosition(AcceptButton, ChangeResolution(UiElementLocations[0], newResolution));
+                ChangePosition(ChatBox, ChangeResolution(UiElementLocations[1], newResolution));
+                ChangePosition(SearchBox, ChangeResolution(UiElementLocations[2], newResolution));
+                ChangePosition(SelectChampButton, ChangeResolution(UiElementLocations[3], newResolution));
+                ChangePosition(LockInButton, ChangeResolution(UiElementLocations[4], newResolution));
+
+                LoadScreen(_screenId);
+            }
+        }
+
+        private static void ChangePosition(FrameworkElement element, Rectangle position)
+        {
+            Canvas.SetLeft(element, position.X);
+            Canvas.SetTop(element, position.Y);
+            element.Width = position.Width;
+            element.Height = position.Height;
+        }
+
+        private static Rectangle ChangeResolution(Rectangle rectangle, Size resolution)
+        {
+            if (resolution == DefaultResolution)
+            {
+                return rectangle;
+            }
+
+            int x = ScaleX(rectangle.X, resolution.Width);
+            int y = ScaleY(rectangle.Y, resolution.Height);
+            int width = ScaleX(rectangle.Width, resolution.Width);
+            int height = ScaleY(rectangle.Height, resolution.Height);
+
+            return new Rectangle(x, y, width, height);
+        }
+
+        private static int ScaleX(double value, double newResolution)
+        {
+            return Scale(value, newResolution, 1280.0);
+        }
+
+        private static int ScaleY(double value, double newResolution)
+        {
+            return Scale(value, newResolution, 720.0);
+        }
+
+        private static int Scale(double value, double newScale, double originalScale)
+        {
+            return (int)Math.Round((value / originalScale) * newScale);
+        }
+
         private void LoadScreen(int screenId)
         {
-            FileStream fileStream = File.OpenRead($"Screens\\Screen ({screenId}).png");
+            FileStream fileStream = File.OpenRead($"Screens\\{Width}x{Height}\\Screen ({screenId}).png");
 
             BitmapImage image = new();
             image.BeginInit();
@@ -122,6 +202,7 @@
             image.EndInit();
 
             Screen.Source = image;
+            _screenId = screenId;
 
             ResetScreenState(screenId);
         }

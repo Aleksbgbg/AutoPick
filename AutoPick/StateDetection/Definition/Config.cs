@@ -7,6 +7,8 @@
 
     public class Config
     {
+        private const int DefaultZOrder = int.MaxValue / 2;
+
         public Config()
         {
             foreach (var stateMetadata in typeof(State).GetMembers(BindingFlags.Static | BindingFlags.Public)
@@ -38,7 +40,7 @@
                     }
 
                     ZOrderAttribute? importanceAttribute = GetAttribute<ZOrderAttribute>(stateMetadata.MemberInfo);
-                    int zOrder = importanceAttribute?.ZOrder ?? int.MaxValue;
+                    int zOrder = importanceAttribute?.ZOrder ?? DefaultZOrder;
 
                     StateMatchers.Add(new StateMatcher(zOrder, stateMetadata.State, detectorArray));
                 }

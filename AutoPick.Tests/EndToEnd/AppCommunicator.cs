@@ -41,7 +41,7 @@
 
             if (responseSize == -1)
             {
-                throw new InvalidOperationException($"Remote app responded incorrectly");
+                throw new InvalidOperationException("Remote app has no response - it may have crashed");
             }
 
             if (responseSize == 0)

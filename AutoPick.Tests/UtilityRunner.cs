@@ -103,10 +103,15 @@
 
             await Task.Delay(delayBeforeScreenshotMs);
 
-            for (int i = 0; infinite; ++i)
+            for (int i = 0; ; ++i)
             {
                 Win32Util.PrintWindow(window, targetDeviceContext, PrintWindowParam.PW_CLIENTONLY);
-                Image.FromHbitmap(bitmap).ToImage<Rgb, byte>().Save($@"{outputDirectory}\Image{i++}.png");
+                Image.FromHbitmap(bitmap).ToImage<Rgb, byte>().Save($@"{outputDirectory}\Image{i}.png");
+
+                if (!infinite)
+                {
+                    break;
+                }
             }
 
             Win32Util.DeleteObject(bitmap);

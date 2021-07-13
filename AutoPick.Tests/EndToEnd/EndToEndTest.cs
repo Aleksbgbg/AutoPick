@@ -27,8 +27,10 @@
             _processManager.Dispose();
         }
 
-        [Fact]
-        public async Task BasicFlow_DetectsAllStates()
+        [Theory]
+        [InlineData(1280, 720)]
+        [InlineData(1920, 1080)]
+        public async Task BasicFlow_DetectsAllStates(int width, int height)
         {
             await _autoPickAppController.Start();
 
@@ -37,6 +39,7 @@
 
             // Window minimised
             await _mockAppController.Start();
+            await _mockAppController.ChangeWindowSize(width, height);
             await _mockAppController.MinimiseWindow();
 
             Assert.Equal(State.Minimised, await _autoPickAppController.GetState());
@@ -79,10 +82,6 @@
             // Intermediate screen (blank)
             await _mockAppController.EnterIntermediateBlankScreen();
             Assert.Equal(State.ChampSelectTransition, await _autoPickAppController.GetState());
-
-            // Connecting screen (early)
-            await _mockAppController.EnterEarlyConnectingScreen();
-            Assert.Equal(State.Connecting, await _autoPickAppController.GetState());
 
             // Connecting screen
             await _mockAppController.EnterConnectingScreen();
@@ -260,7 +259,7 @@
         }
 
         [Fact]
-        public async Task WindowSizeChanges_StillDetectsCorrectly()
+        public async Task DetectsInvalidWindowSizes()
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
@@ -278,8 +277,13 @@
 
             Assert.Equal(State.InvalidWindowSize, await _autoPickAppController.GetState());
 
-            // After resizing correctly
+            // Default size
             await _mockAppController.ChangeWindowSize(1280, 720);
+
+            Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
+
+            // Supported size
+            await _mockAppController.ChangeWindowSize(1920, 1080);
 
             Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
         }
