@@ -103,6 +103,10 @@
             await _mockAppController.EnterChampSelectedScreen();
             Assert.Equal(State.Selected, await _autoPickAppController.GetState());
 
+            // Champ selected (but not locked in) screen with hover
+            await _mockAppController.EnterChampSelectedScreenAndHoverLockInButton();
+            Assert.Equal(State.Selected, await _autoPickAppController.GetState());
+
             // Locked in screen
             await _mockAppController.EnterLockedScreen();
             Assert.Equal(State.Locked, await _autoPickAppController.GetState());

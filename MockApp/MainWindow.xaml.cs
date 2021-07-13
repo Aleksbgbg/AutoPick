@@ -194,7 +194,7 @@
 
         private void LoadScreen(int screenId)
         {
-            FileStream fileStream = File.OpenRead($"Screens\\{Width}x{Height}\\Screen ({screenId}).png");
+            FileStream fileStream = File.OpenRead($"Screens\\{Width}x{Height}\\{screenId}.png");
 
             BitmapImage image = new();
             image.BeginInit();
@@ -223,13 +223,13 @@
             SelectChampButton.Visibility = Visibility.Hidden;
             LockInButton.Visibility = Visibility.Hidden;
 
-            if (screenId == 12)
+            if (screenId == 11)
             {
                 ChatBox.Visibility = Visibility.Visible;
                 SearchBox.Visibility = Visibility.Visible;
                 SelectChampButton.Visibility = Visibility.Visible;
             }
-            else if (screenId == 13)
+            else if (screenId == 12)
             {
                 LockInButton.Visibility = Visibility.Visible;
             }

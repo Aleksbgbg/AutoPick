@@ -121,22 +121,22 @@
             await _appCommunicator.Send(9);
         }
 
-        public async Task EnterEarlyConnectingScreen()
+        public async Task EnterConnectingScreen()
         {
             await _appCommunicator.Send(10);
         }
 
-        public async Task EnterConnectingScreen()
+        public async Task EnterPickScreen()
         {
             await _appCommunicator.Send(11);
         }
 
-        public async Task EnterPickScreen()
+        public async Task EnterChampSelectedScreen()
         {
             await _appCommunicator.Send(12);
         }
 
-        public async Task EnterChampSelectedScreen()
+        public async Task EnterChampSelectedScreenAndHoverLockInButton()
         {
             await _appCommunicator.Send(13);
         }
