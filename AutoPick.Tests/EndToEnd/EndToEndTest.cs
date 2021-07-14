@@ -29,6 +29,7 @@
 
         [Theory]
         [InlineData(1280, 720)]
+        [InlineData(1600, 900)]
         [InlineData(1920, 1080)]
         public async Task BasicFlow_DetectsAllStates(int width, int height)
         {
@@ -277,7 +278,7 @@
             Assert.Equal(State.InvalidWindowSize, await _autoPickAppController.GetState());
 
             // Too big
-            await _mockAppController.ChangeWindowSize(1600, 900);
+            await _mockAppController.ChangeWindowSize(2560, 1440);
 
             Assert.Equal(State.InvalidWindowSize, await _autoPickAppController.GetState());
 

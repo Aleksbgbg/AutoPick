@@ -56,10 +56,10 @@
 
         public static bool IsValidSize(IntPtr window)
         {
-            Win32Util.GetWindowRect(window, out Win32Rect windowRect);
+            Win32Rect windowSize = GetWindowSize(window);
 
-            bool widthValid = (windowRect.Width == 1280) || (windowRect.Width == 1920);
-            bool heightValid = (windowRect.Height == 720) || (windowRect.Height == 1080);
+            bool widthValid = windowSize.Width is 1280 or 1600 or 1920;
+            bool heightValid = windowSize.Height is 720 or 900 or 1080;
 
             return widthValid && heightValid;
         }
@@ -69,14 +69,14 @@
             IntPtr sourceDeviceContext = Win32Util.GetDC(window);
             IntPtr targetDeviceContext = Win32Util.CreateCompatibleDC(sourceDeviceContext);
 
-            Win32Util.GetWindowRect(window, out Win32Rect windowRect);
+            Win32Rect windowSize = GetWindowSize(window);
 
-            IntPtr bitmap = Win32Util.CreateCompatibleBitmap(sourceDeviceContext, windowRect.Width, windowRect.Height);
+            IntPtr bitmap = Win32Util.CreateCompatibleBitmap(sourceDeviceContext, windowSize.Width, windowSize.Height);
             Win32Util.SelectObject(targetDeviceContext, bitmap);
 
             return new WindowManipulator(
                 new StateDetector(config),
-                new ClickPoints(new Size(windowRect.Width, windowRect.Height)),
+                new ClickPoints(new Size(windowSize.Width, windowSize.Height)),
                 window, sourceDeviceContext, targetDeviceContext, bitmap);
         }
 

@@ -47,5 +47,51 @@
 
             return false;
         }
+
+        public HighestMatchResult HighestMatch(Image<Gray, byte> image)
+        {
+            Image<Gray, float> match =  image.GetSubRect(_targetLocation)
+                                             .MatchTemplate(_template, TemplateMatchingType.CcoeffNormed);
+
+            float highestMatch = float.MinValue;
+            bool surpassesThreshold = false;
+
+            float[,,] matches = match.Data;
+            for (int y = 0; y < matches.GetLength(0); y++)
+            {
+                for (int x = 0; x < matches.GetLength(1); x++)
+                {
+                    float matchScore = matches[y, x, 0];
+
+                    if (matchScore > highestMatch)
+                    {
+                        highestMatch = matchScore;
+                    }
+
+                    if (matchScore > _threshold)
+                    {
+                        surpassesThreshold = true;
+                    }
+                }
+            }
+
+            return new HighestMatchResult(highestMatch, surpassesThreshold, State);
+        }
+
+        public readonly struct HighestMatchResult
+        {
+            public HighestMatchResult(float highestMatch, bool surpassesThreshold, State state)
+            {
+                HighestMatch = highestMatch;
+                SurpassesThreshold = surpassesThreshold;
+                State = state;
+            }
+
+            public float HighestMatch { get; }
+
+            public bool SurpassesThreshold { get; }
+
+            public State State { get; }
+        }
     }
 }

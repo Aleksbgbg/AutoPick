@@ -11,6 +11,8 @@
 
         public Config()
         {
+            CombinedDetectors = GetManyAttributes<State, CombinedDetectorsAttribute>();
+
             foreach (var stateMetadata in typeof(State).GetMembers(BindingFlags.Static | BindingFlags.Public)
                                                        .Zip(Enum.GetValues<State>(),
                                                             (memberInfo, state) => new
@@ -47,13 +49,20 @@
             }
         }
 
-        public Dictionary<State, int> RefreshRates { get; } = new();
+        public CombinedDetectorsAttribute[] CombinedDetectors { get; }
 
         public List<StateMatcher> StateMatchers { get; } = new();
+
+        public Dictionary<State, int> RefreshRates { get; } = new();
 
         private static T? GetAttribute<T>(MemberInfo enumValue) where T : Attribute
         {
             return (T?)enumValue.GetCustomAttribute(typeof(T));
+        }
+
+        private static TAttribute[] GetManyAttributes<TTargetType, TAttribute>() where TAttribute : Attribute
+        {
+            return (TAttribute[])typeof(TTargetType).GetCustomAttributes(typeof(TAttribute));
         }
 
         private static T[] GetManyAttributes<T>(MemberInfo enumValue) where T : Attribute

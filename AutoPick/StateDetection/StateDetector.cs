@@ -18,10 +18,9 @@
 
         public StateDetector(Config config)
         {
-            _imageRecognisers = config.StateMatchers
-                                      .OrderBy(matcher => matcher.ZOrder)
-                                      .SelectMany(matcher => CreateImageRecogniser(matcher.State, matcher.Detectors))
-                                      .ToArray();
+            _imageRecognisers = GetDetectors(config).OrderBy(detector => detector.ZOrder)
+                                                    .SelectMany(detector => detector.Recognisers)
+                                                    .ToArray();
         }
 
         public State Detect(Image<Gray, byte> image)
@@ -48,7 +47,38 @@
             return State.Idle;
         }
 
-        private static IEnumerable<IImageRecogniser> CreateImageRecogniser(State state, Detector[] detectors)
+        private static IEnumerable<DetectorInfo> GetDetectors(Config config)
+        {
+            Dictionary<State, DetectorInfo> detectorsPerState =
+                config.StateMatchers
+                      .ToDictionary(stateMatcher => stateMatcher.State,
+                                    stateMatcher => new DetectorInfo(
+                                        stateMatcher.ZOrder,
+                                        CreateMultipleImageRecognisers(stateMatcher.State, stateMatcher.Detectors)));
+
+            DetectorInfo[] combinedDetectors = new DetectorInfo[config.CombinedDetectors.Length];
+
+            for (int index = 0; index < combinedDetectors.Length; ++index)
+            {
+                CombinedDetectorsAttribute combinedDetectorsAttribute = config.CombinedDetectors[index];
+                combinedDetectors[index] = new DetectorInfo(
+                    combinedDetectorsAttribute.States.Min(state => detectorsPerState[state].ZOrder),
+                    new CombinedConvolutionImageRecogniser(
+                        combinedDetectorsAttribute.States
+                                        .SelectMany(state => detectorsPerState[state].Recognisers)
+                                        .Cast<ConvolutionImageRecogniser>()
+                                        .ToArray()));
+
+                foreach (State state in combinedDetectorsAttribute.States)
+                {
+                    detectorsPerState.Remove(state);
+                }
+            }
+
+            return detectorsPerState.Values.Concat(combinedDetectors);
+        }
+
+        private static IEnumerable<IImageRecogniser> CreateMultipleImageRecognisers(State state, Detector[] detectors)
         {
             return detectors.Select(detector => CreateImageRecogniser(state, detector));
         }
@@ -76,6 +106,23 @@
             }
 
             return ((Bitmap) Image.FromStream(stream)).ToImage<Gray, byte>();
+        }
+
+        private class DetectorInfo
+        {
+            public DetectorInfo(int zOrder, IImageRecogniser recogniser) : this(zOrder, new []{recogniser})
+            {
+            }
+
+            public DetectorInfo(int zOrder, IEnumerable<IImageRecogniser> recognisers)
+            {
+                ZOrder = zOrder;
+                Recognisers = recognisers;
+            }
+
+            public int ZOrder { get; }
+
+            public IEnumerable<IImageRecogniser> Recognisers { get; }
         }
     }
 }

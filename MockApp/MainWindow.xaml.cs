@@ -140,18 +140,20 @@
             Width = width;
             Height = height;
 
-            if (((width == 1920) || (width == 1280)) && ((height == 1080) || (height == 720)))
+            if (!Directory.Exists($"Screens/{width}x{height}"))
             {
-                Size newResolution = new(width, height);
-
-                ChangePosition(AcceptButton, ChangeResolution(UiElementLocations[0], newResolution));
-                ChangePosition(ChatBox, ChangeResolution(UiElementLocations[1], newResolution));
-                ChangePosition(SearchBox, ChangeResolution(UiElementLocations[2], newResolution));
-                ChangePosition(SelectChampButton, ChangeResolution(UiElementLocations[3], newResolution));
-                ChangePosition(LockInButton, ChangeResolution(UiElementLocations[4], newResolution));
-
-                LoadScreen(_screenId);
+                return;
             }
+
+            Size newResolution = new(width, height);
+
+            ChangePosition(AcceptButton, ChangeResolution(UiElementLocations[0], newResolution));
+            ChangePosition(ChatBox, ChangeResolution(UiElementLocations[1], newResolution));
+            ChangePosition(SearchBox, ChangeResolution(UiElementLocations[2], newResolution));
+            ChangePosition(SelectChampButton, ChangeResolution(UiElementLocations[3], newResolution));
+            ChangePosition(LockInButton, ChangeResolution(UiElementLocations[4], newResolution));
+
+            LoadScreen(_screenId);
         }
 
         private static void ChangePosition(FrameworkElement element, Rectangle position)

@@ -17,7 +17,7 @@
     // To run a test, enable it and ensure the test case(s) use your required parameters.
     public class UtilityRunner
     {
-        private const string SkipReason = "All utilities skipped by default.";
+        private const string SkipReason = "All utilities are skipped by default. Remove skip reason to enable and run.";
 
         [Theory(Skip = SkipReason)]
         [InlineData(@"A:\Downloads\tessdata-master", @"A:\Text.png", "Hi")]
@@ -32,16 +32,19 @@
         }
 
         [Theory(Skip = SkipReason)]
-        [InlineData(@"A:\Content\League\Connecting.png",
-                    @"A:\Content\League\Capture\Image1.png",
-                    @"A:\Content\League\Capture\match-Image1.png",
-                    32, 644, 72, 10)]
-        public void MatchImageAndSaveMatchRegionToNewImage(string templatePath, string imageToMatchPath, string outputPath,
+        [InlineData(
+            @"A:\Programming\AutoPick\AutoPick\DetectionImages\Pick.png",
+            @"A:\Programming\AutoPick\AutoPick.Tests\bin\Debug\net5.0-windows\TestImages\1600x900\BasicScreens\[8]Pick.png",
+            @"A:\MatchRegion.png",
+            555, 588, 172, 42)]
+        public void MatchImageAndSaveMatchRegionToNewImage(string templatePath, string targetImagePath,
+                                                           string outputPath,
                                                            int matchX, int matchY, int matchWidth, int matchHeight)
         {
             Image<Gray, byte> template = new(templatePath);
-            Image<Gray, byte> matchRegion = new Image<Gray, byte>(imageToMatchPath)
-                .GetSubRect(new Rectangle(matchX, matchY, matchWidth, matchHeight));
+            Image<Gray, byte> matchRegion = new Image<Gray, byte>(targetImagePath)
+                                            .Resize(1280, 720, Inter.Lanczos4)
+                                            .GetSubRect(new Rectangle(matchX, matchY, matchWidth, matchHeight));
 
             Image<Gray, float> matchImage = matchRegion.MatchTemplate(template, TemplateMatchingType.CcoeffNormed);
             double minVal = 0;
@@ -59,7 +62,7 @@
 
                     if (matchScore > 0.5f)
                     {
-                        matchRegion.Draw(new Rectangle(x - 1, y - 1, matchWidth + 1, matchHeight + 1), new Gray(1));
+                        matchRegion.Draw(new Rectangle(x, y, matchWidth - 1, matchHeight - 1), new Gray(1.0));
                     }
                 }
 
@@ -69,13 +72,13 @@
         }
 
         [Theory(Skip = SkipReason)]
-        [InlineData(@"A:\Programming\AutoPick\AutoPick\Detect\Accept.png",
-                    @"A:\Content\League\[4]Accept.png",
-                    646, 383, 107, 20)]
+        [InlineData(@"A:\Programming\AutoPick\AutoPick.Tests\TestImages\1280x720\BasicScreens\[8]Pick.png",
+                    @"A:\Programming\AutoPick\AutoPick\DetectionImages\Pick.png",
+                    555, 588, 172, 42)]
         public void CutImage(string sourceImage, string outputPath, int matchX, int matchY, int width, int height)
         {
-            Image<Gray, byte> source = new(sourceImage);
-            Image<Gray, byte> target = new(new Size(width, height));
+            Image<Rgb, byte> source = new(sourceImage);
+            Image<Rgb, byte> target = new(new Size(width, height));
 
             for (int x = 0; x < width; ++x)
             {
@@ -140,10 +143,10 @@
 
         [Theory(Skip = SkipReason)]
         [InlineData(
-            @"A:\Programming\AutoPick\AutoPick.Tests\bin\Debug\net5.0-windows\TestImages\1280x720\BasicScreens\[7]Connecting.png",
-            @"A:\Programming\AutoPick\AutoPick.Tests\bin\Debug\net5.0-windows\TestImages\1920x1080\ConnectingTransitionFrames\1692.png",
-            @"A:\ResizeComparison.png",
-            28, 640, 80, 20)]
+            @"A:\Programming\AutoPick\AutoPick.Tests\bin\Debug\net5.0-windows\TestImages\1280x720\BasicScreens\[8]Pick.png",
+            @"A:\Programming\AutoPick\AutoPick.Tests\bin\Debug\net5.0-windows\TestImages\1280x720\BasicScreens\[9]SelectedHover.png",
+            @"A:\ResizeComparison1.png",
+            555, 588, 172, 42)]
         public void CompareRegionBeforeAndAfterResize(string originalImagePath, string imageToResizePath,
                                                       string outputPath,
                                                       int regionX, int regionY, int regionWidth, int regionHeight)

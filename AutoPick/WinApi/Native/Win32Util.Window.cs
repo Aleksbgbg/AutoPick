@@ -4,7 +4,7 @@
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Win32Rect
+    public readonly struct Win32Rect
     {
         private readonly int _left;
         private readonly int _top;
@@ -16,7 +16,7 @@
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Win32Point
+    public readonly struct Win32Point
     {
         public Win32Point(int x, int y)
         {
@@ -154,25 +154,5 @@
 
         [DllImport(User32Dll)]
         public static extern WindowStylesEx GetWindowLongA(IntPtr windowHandle, GetWindowLongParam param);
-
-        [DllImport(User32Dll)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool LogicalToPhysicalPointForPerMonitorDPI(IntPtr windowHandle, ref Win32Point point);
-
-        [DllImport(User32Dll)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool LogicalToPhysicalPoint(IntPtr windowHandle, ref Win32Point point);
-
-        [DllImport(User32Dll)]
-        public static extern IntPtr MonitorFromWindow(
-            IntPtr windowHandle,
-            MonitorFromWindowParam flags
-        );
-
-        [DllImport("Shcore.dll")]
-        public static extern IntPtr GetScaleFactorForMonitor(
-            IntPtr            hMon,
-            out DeviceScaleFactor scale
-        );
     }
 }
