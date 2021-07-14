@@ -7,15 +7,15 @@
     {
         protected bool IsStateNew { get; private set; }
 
-        public async Task Execute(State lastState, State currentState, WindowManipulator windowManipulator)
+        public async Task Execute(State lastState, State currentState, ILeagueClientManipulator clientManipulator)
         {
             IsStateNew = lastState != currentState;
 
-            windowManipulator.AttemptToBringLeagueToForeground();
-            await ExecuteAction(windowManipulator);
-            windowManipulator.RestoreLeague();
+            clientManipulator.AttemptToBringLeagueToForeground();
+            await ExecuteAction(clientManipulator);
+            clientManipulator.RestoreLeague();
         }
 
-        protected abstract Task ExecuteAction(WindowManipulator windowManipulator);
+        protected abstract Task ExecuteAction(ILeagueClientExecutor clientExecutor);
     }
 }

@@ -1,8 +1,13 @@
 ﻿namespace AutoPick.ViewModels
 {
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.IO;
+    using System.Windows.Media.Imaging;
     using AutoPick.StateDetection.Definition;
+    using AutoPick.Util;
 
-    public class MainViewModel : ViewModelBase, IUserConfiguration, IStateConsumer
+    public class MainViewModel : ViewModelBase, IUserConfiguration, IStateConsumer, IBitmapConsumer
     {
         private string _champText = "Katarina";
         public string ChampText
@@ -55,6 +60,23 @@
             }
         }
 
+        private BitmapImage? _source;
+        public BitmapImage? Source
+        {
+            get => _source;
+
+            private set
+            {
+                if (_source == value)
+                {
+                    return;
+                }
+
+                _source = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         string IUserConfiguration.LaneName => LaneText;
 
         string IUserConfiguration.ChampionName => ChampText;
@@ -62,6 +84,25 @@
         public void Consume(State state)
         {
             State = state;
+        }
+
+        public void Consume(Bitmap bitmap)
+        {
+            Execute.OnUiThread(() =>
+            {
+                using MemoryStream memory = new();
+
+                bitmap.Save(memory, ImageFormat.Bmp);
+                memory.Position = 0;
+
+                BitmapImage bitmapImage = new();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+
+                Source = bitmapImage;
+            });
         }
     }
 }

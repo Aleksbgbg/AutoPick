@@ -33,7 +33,7 @@
             };
             mainWindow.Show();
 
-            AutoPicker autoPicker = AutoPicker.Run(mainViewModel, mainViewModel);
+            AutoPicker autoPicker = AutoPicker.Run(mainViewModel, mainViewModel, mainViewModel);
 
             HotKey.Factory hotKeyFactory = HotKey.Factory.For(mainWindow);
 

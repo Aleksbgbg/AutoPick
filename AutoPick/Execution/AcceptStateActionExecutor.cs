@@ -4,9 +4,9 @@
 
     public class AcceptStateActionExecutor : ActionExecutor
     {
-        protected override Task ExecuteAction(WindowManipulator windowManipulator)
+        protected override Task ExecuteAction(ILeagueClientExecutor clientExecutor)
         {
-            return windowManipulator.AcceptMatch();
+            return clientExecutor.AcceptMatch();
         }
     }
 }

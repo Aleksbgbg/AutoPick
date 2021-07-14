@@ -4,9 +4,9 @@
 
     public class SelectedStateActionExecutor : ActionExecutor
     {
-        protected override Task ExecuteAction(WindowManipulator windowManipulator)
+        protected override Task ExecuteAction(ILeagueClientExecutor clientExecutor)
         {
-            return windowManipulator.LockIn();
+            return clientExecutor.LockIn();
         }
     }
 }

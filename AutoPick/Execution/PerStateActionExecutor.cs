@@ -15,11 +15,11 @@
             _actionsPerState[state] = actionExecutor;
         }
 
-        public async Task ExecuteAction(State currentState, WindowManipulator windowManipulator)
+        public async Task ExecuteAction(State currentState, ILeagueClientManipulator clientManipulator)
         {
             if (_actionsPerState.ContainsKey(currentState))
             {
-                await _actionsPerState[currentState].Execute(_lastState, currentState, windowManipulator);
+                await _actionsPerState[currentState].Execute(_lastState, currentState, clientManipulator);
             }
 
             _lastState = currentState;

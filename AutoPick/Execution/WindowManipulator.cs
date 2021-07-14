@@ -11,7 +11,7 @@
     using Emgu.CV;
     using Emgu.CV.Structure;
 
-    public class WindowManipulator
+    public class WindowManipulator : ILeagueClientManipulator
     {
         private const int ShortDelayMs = 100;
         private const int LongDelayMs = 200;
@@ -91,6 +91,13 @@
         {
             return _stateDetector.Detect(TakeSnapshot());
         }
+
+    #if DEBUG
+        public Bitmap LastScreenshot()
+        {
+            return Image.FromHbitmap(_bitmap);
+        }
+    #endif
 
         public void AttemptToBringLeagueToForeground()
         {

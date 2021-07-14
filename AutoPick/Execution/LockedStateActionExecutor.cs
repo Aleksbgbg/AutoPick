@@ -11,11 +11,11 @@
             _userConfiguration = userConfiguration;
         }
 
-        protected override async Task ExecuteAction(WindowManipulator windowManipulator)
+        protected override async Task ExecuteAction(ILeagueClientExecutor clientExecutor)
         {
             if (IsStateNew)
             {
-                await windowManipulator.CallLane(_userConfiguration.LaneName);
+                await clientExecutor.CallLane(_userConfiguration.LaneName);
             }
         }
     }

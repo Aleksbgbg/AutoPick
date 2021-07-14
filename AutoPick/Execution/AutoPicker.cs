@@ -16,6 +16,7 @@
         private readonly PerStateActionExecutor _actionExecutor;
 
         private readonly IStateConsumer _stateConsumer;
+        private readonly IBitmapConsumer _bitmapConsumer;
 
         private WindowManipulator? _windowManipulator;
 
@@ -23,14 +24,20 @@
 
         private bool _enabled = true;
 
-        private AutoPicker(Config config, PerStateActionExecutor actionExecutor, IStateConsumer stateConsumer)
+        private AutoPicker(
+            Config config,
+            PerStateActionExecutor actionExecutor,
+            IStateConsumer stateConsumer,
+            IBitmapConsumer bitmapConsumer)
         {
             _config = config;
             _actionExecutor = actionExecutor;
             _stateConsumer = stateConsumer;
+            _bitmapConsumer = bitmapConsumer;
         }
 
-        public static AutoPicker Run(IUserConfiguration userConfiguration, IStateConsumer stateConsumer)
+        public static AutoPicker Run(
+            IUserConfiguration userConfiguration, IStateConsumer stateConsumer, IBitmapConsumer bitmapConsumer)
         {
             PerStateActionExecutor perStateActionExecutor = new();
             perStateActionExecutor.RegisterAction(State.Accept, new AcceptStateActionExecutor());
@@ -38,7 +45,7 @@
             perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
             perStateActionExecutor.RegisterAction(State.Locked, new LockedStateActionExecutor(userConfiguration));
 
-            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, stateConsumer);
+            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, stateConsumer, bitmapConsumer);
             Task.Factory.StartNew(autoPicker.LoopThread, TaskCreationOptions.LongRunning);
 
             return autoPicker;
@@ -68,6 +75,17 @@
 
                     Task action = RunTakeActionThread(state);
                     RunStateReportThread(state);
+
+                #if DEBUG
+                    Task.Run(() =>
+                    {
+                        if (_windowManipulator != null)
+                        {
+                            _bitmapConsumer.Consume(_windowManipulator.LastScreenshot());
+                        }
+                    });
+                #endif
+
                     await action;
 
                 #if DEBUG
