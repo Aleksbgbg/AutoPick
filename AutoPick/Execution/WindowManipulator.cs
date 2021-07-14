@@ -3,11 +3,11 @@
     using System;
     using System.Drawing;
     using System.Threading.Tasks;
-    using AutoPick.Debug;
+    using AutoPick.DebugTools;
     using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.Win32;
-    using AutoPick.Win32.Native;
+    using AutoPick.WinApi;
+    using AutoPick.WinApi.Native;
     using Emgu.CV;
     using Emgu.CV.Structure;
 

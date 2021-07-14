@@ -3,12 +3,12 @@
     using System;
     using System.Threading;
     using System.Windows;
-    using AutoPick.Debug;
+    using AutoPick.DebugTools;
     using AutoPick.Execution;
     using AutoPick.ViewModels;
     using AutoPick.Views;
-    using AutoPick.Win32;
-    using AutoPick.Win32.Native;
+    using AutoPick.WinApi;
+    using AutoPick.WinApi.Native;
 
     public partial class App
     {

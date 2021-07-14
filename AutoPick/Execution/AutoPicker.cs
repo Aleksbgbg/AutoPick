@@ -2,9 +2,9 @@
 {
     using System;
     using System.Threading.Tasks;
-    using AutoPick.Debug;
+    using AutoPick.DebugTools;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.Win32.Native;
+    using AutoPick.WinApi.Native;
 
     public class AutoPicker
     {

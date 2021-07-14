@@ -2,7 +2,7 @@
 {
     using System;
     using System.Drawing;
-    using AutoPick.Win32.Native;
+    using AutoPick.WinApi.Native;
 
     // All points are relative to the default resolution
     public class ClickPoints

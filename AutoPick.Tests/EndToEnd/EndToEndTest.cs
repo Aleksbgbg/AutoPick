@@ -4,8 +4,8 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.Win32;
-    using AutoPick.Win32.Native;
+    using AutoPick.WinApi;
+    using AutoPick.WinApi.Native;
     using Xunit;
 
     public class EndToEndTest : IDisposable
