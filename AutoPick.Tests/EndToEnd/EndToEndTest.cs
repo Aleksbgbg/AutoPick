@@ -273,14 +273,14 @@
             Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
 
             // Too small
-            await _mockAppController.ChangeWindowSize(10, 10);
+            await _mockAppController.ChangeWindowSize(1023, 575);
 
             Assert.Equal(State.InvalidWindowSize, await _autoPickAppController.GetState());
 
-            // Too big
-            await _mockAppController.ChangeWindowSize(2560, 1440);
+            // Lowest supported size
+            await _mockAppController.ChangeWindowSize(1024, 576);
 
-            Assert.Equal(State.InvalidWindowSize, await _autoPickAppController.GetState());
+            Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
 
             // Default size
             await _mockAppController.ChangeWindowSize(1280, 720);

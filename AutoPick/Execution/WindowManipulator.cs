@@ -57,11 +57,7 @@
         public static bool IsValidSize(IntPtr window)
         {
             Win32Rect windowSize = GetWindowSize(window);
-
-            bool widthValid = windowSize.Width is 1280 or 1600 or 1920;
-            bool heightValid = windowSize.Height is 720 or 900 or 1080;
-
-            return widthValid && heightValid;
+            return (windowSize.Width >= 1024) && (windowSize.Height >= 576);
         }
 
         public static WindowManipulator Create(IntPtr window, Config config)

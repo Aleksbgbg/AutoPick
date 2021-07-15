@@ -9,15 +9,20 @@ If the program misbehaves, it can be disabled by pressing `Ctrl+Shift+Alt+F2` an
 
 To get a release version you can run, right click `publish.ps1` and press `Run with PowerShell`, or execute `powershell ./publish.ps1` in the current directory. The script will produce a runnable executable `AutoPick.exe`.
 
+## Demo
+![AutoPick demo](demo.gif)
+
 ## Resolution Support
 Common resolutions and their support:
-- `1024x576` - Unsupported
+- `1024x576` - Enabled but not confirmed
 - `1280x720` - Fully supported (default)
-- `1600x900` - Unsupported
+- `1600x900` - Fully supported
 - `1920x1080` - Fully supported
-- `2560x1440` - Unsupported
+- `2560x1440` - Enabled but not confirmed
 
-DPI scaling is currently **not supported** - running the client on monitors using scaling will cause the program to not be able to detect anything or take any actions.
+DPI scaling is supported, however any resultant resolution that falls outside of the fully supported resolutions will  have unspecified behaviour.
+
+All physical resolutions above 1024x576 are enabled.
 
 A resolution is fully supported when all tests pass after the following changes are made:
 1. The following basic screens are added to `AutoPick.Tests/TestImages/{resolution}/BasicScreens`:
@@ -48,6 +53,3 @@ A resolution is fully supported when all tests pass after the following changes 
 5. A parameterised test case is added to `AutoPick.Tests/EndToEnd/EndToEndTest.cs` with the resolution parameters.
 
 Check tests for the base resolution `1280x720` to verify what these images look like.
-
-## Demo
-![AutoPick demo](demo.gif)

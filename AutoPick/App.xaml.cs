@@ -1,7 +1,6 @@
 ﻿namespace AutoPick
 {
     using System;
-    using System.Threading;
     using System.Windows;
     using AutoPick.DebugTools;
     using AutoPick.Execution;
@@ -13,6 +12,13 @@
     public partial class App
     {
         private readonly SingleInstance _singleInstance = new();
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            DpiAwareness.Enable();
+
+            base.OnStartup(e);
+        }
 
         private void AppStartup(object sender, StartupEventArgs e)
         {
