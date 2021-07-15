@@ -18,7 +18,7 @@ Common resolutions and their support:
 - `1280x720` - Fully supported (default)
 - `1600x900` - Fully supported
 - `1920x1080` - Fully supported
-- `2560x1440` - Enabled but not confirmed
+- `2560x1440` - Fully supported
 
 DPI scaling is supported, however any resultant resolution that falls outside of the fully supported resolutions will  have unspecified behaviour.
 

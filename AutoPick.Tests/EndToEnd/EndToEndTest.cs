@@ -31,6 +31,7 @@
         [InlineData(1280, 720)]
         [InlineData(1600, 900)]
         [InlineData(1920, 1080)]
+        [InlineData(2560, 1440)]
         public async Task BasicFlow_DetectsAllStates(int width, int height)
         {
             await _autoPickAppController.Start();

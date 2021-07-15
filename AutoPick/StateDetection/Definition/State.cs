@@ -11,7 +11,7 @@
         Idle = 0,
 
         [PollingRate(PollingRates.Fast)]
-        [Detector(SearchAlgorithm.Convolution, "Lobby.png", 441, 680, 10, 10, Threshold = 0.94f)]
+        [Detector(SearchAlgorithm.Convolution, "Lobby.png", 441, 680, 10, 10, Threshold = 0.85f)]
         Lobby,
 
         [ZOrder(4)]
@@ -37,7 +37,7 @@
 
         [ZOrder(1)]
         [PollingRate(PollingRates.VeryFast)]
-        [Detector(SearchAlgorithm.Convolution, "ChampSelectTransition.png", 1135, 52, 92, 12, Threshold = 0.76f)]
+        [Detector(SearchAlgorithm.Convolution, "ChampSelectTransition.png", 1135, 52, 92, 12, Threshold = 0.73f)]
         [Detector(SearchAlgorithm.ExactPixelMatch, "ChampSelectTransitionBlank.png", 640, 360, 20, 20)]
         ChampSelectTransition,
 
@@ -62,7 +62,7 @@
         Selected,
 
         [PollingRate(PollingRates.Fast)]
-        [Detector(SearchAlgorithm.Convolution, "Locked.png", 833, 675, 18, 18, Threshold = 0.79f)]
+        [Detector(SearchAlgorithm.Convolution, "Locked.png", 833, 675, 18, 18, Threshold = 0.78f)]
         Locked,
 
         [PollingRate(PollingRates.Fast)]
