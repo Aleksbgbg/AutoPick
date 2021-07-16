@@ -28,6 +28,7 @@
         }
 
         [Theory]
+        [InlineData(1024, 576)]
         [InlineData(1280, 720)]
         [InlineData(1600, 900)]
         [InlineData(1920, 1080)]

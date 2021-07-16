@@ -11,7 +11,7 @@
         Idle = 0,
 
         [PollingRate(PollingRates.Fast)]
-        [Detector(SearchAlgorithm.Convolution, "Lobby.png", 441, 680, 10, 10, Threshold = 0.85f)]
+        [Detector(SearchAlgorithm.Convolution, "Lobby.png", 441, 680, 10, 10, Threshold = 0.73f)]
         Lobby,
 
         [ZOrder(4)]
@@ -22,22 +22,22 @@
 
         [ZOrder(3)]
         [PollingRate(PollingRates.VeryFast)]
-        [Detector(SearchAlgorithm.Convolution, "Accept.png", 646, 383, 107, 20, Threshold = 0.96f)]
+        [Detector(SearchAlgorithm.Convolution, "Accept.png", 646, 383, 107, 20, Threshold = 0.94f)]
         Accept,
 
         [ZOrder(2)]
         [PollingRate(PollingRates.VeryFast)]
-        [Detector(SearchAlgorithm.Convolution, "Accepted.png", 619, 383, 119, 20, Threshold = 0.95f)]
+        [Detector(SearchAlgorithm.Convolution, "Accepted.png", 619, 383, 119, 20, Threshold = 0.94f)]
         Accepted,
 
         [ZOrder(2)]
         [PollingRate(PollingRates.VeryFast)]
-        [Detector(SearchAlgorithm.Convolution, "Declined.png", 623, 383, 129, 20, Threshold = 0.96f)]
+        [Detector(SearchAlgorithm.Convolution, "Declined.png", 623, 383, 129, 20, Threshold = 0.94f)]
         Declined,
 
         [ZOrder(1)]
         [PollingRate(PollingRates.VeryFast)]
-        [Detector(SearchAlgorithm.Convolution, "ChampSelectTransition.png", 1135, 52, 92, 12, Threshold = 0.73f)]
+        [Detector(SearchAlgorithm.Convolution, "ChampSelectTransition.png", 1135, 52, 92, 12, Threshold = 0.65f)]
         [Detector(SearchAlgorithm.ExactPixelMatch, "ChampSelectTransitionBlank.png", 640, 360, 20, 20)]
         ChampSelectTransition,
 
@@ -53,7 +53,6 @@
 
         [ZOrder(0)]
         [PollingRate(PollingRates.Fast)]
-        // Conflicts with Selected if below 0.89
         [Detector(SearchAlgorithm.Convolution, "Pick.png", 555, 588, 172, 42, Threshold = 0.87f)]
         Pick,
 
@@ -66,7 +65,7 @@
         Locked,
 
         [PollingRate(PollingRates.Fast)]
-        [Detector(SearchAlgorithm.Convolution, "InGame.png", 1135, 52, 61, 11, Threshold = 0.73f)]
+        [Detector(SearchAlgorithm.Convolution, "InGame.png", 1135, 52, 61, 11, Threshold = 0.7f)]
         InGame,
 
         [PollingRate(PollingRates.Fast)]
