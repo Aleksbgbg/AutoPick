@@ -45,7 +45,7 @@
         [ZOrder(-1)]
         [PollingRate(PollingRates.VeryFast)]
         // Changed location to aid detection when window resized; original = 32, 644, 72, 10
-        [Detector(SearchAlgorithm.Convolution, "Connecting.png", 28, 640, 80, 20, Threshold = 0.65f)]
+        [Detector(SearchAlgorithm.Convolution, "Connecting.png", 30, 642, 76, 14, Threshold = 0.65f)]
         Connecting,
 
         [ZOrder(0)]
