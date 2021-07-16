@@ -43,7 +43,6 @@
             perStateActionExecutor.RegisterAction(State.Accept, new AcceptStateActionExecutor());
             perStateActionExecutor.RegisterAction(State.Pick, new PickStateActionExecutor(userConfiguration));
             perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
-            perStateActionExecutor.RegisterAction(State.Locked, new LockedStateActionExecutor(userConfiguration));
 
             AutoPicker autoPicker = new(new Config(), perStateActionExecutor, stateConsumer, bitmapConsumer);
             Task.Factory.StartNew(autoPicker.LoopThread, TaskCreationOptions.LongRunning);

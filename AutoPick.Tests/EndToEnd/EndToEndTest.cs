@@ -120,7 +120,7 @@
         }
 
         [Fact]
-        public async Task PickScreen_CallsLaneTwice()
+        public async Task PickScreen_CallsLaneMultipleTimes()
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
@@ -131,6 +131,7 @@
 
             Assert.Equal(State.Pick, await _autoPickAppController.GetState());
             Assert.Collection(await _mockAppController.GetChatLines(),
+                              line => Assert.Equal("mid", line),
                               line => Assert.Equal("mid", line),
                               line => Assert.Equal("mid", line));
         }
@@ -145,21 +146,6 @@
 
             Assert.Equal(State.Selected, await _autoPickAppController.GetState());
             Assert.True(await _mockAppController.HasLockedIn());
-        }
-
-        [Fact]
-        public async Task LockedScreen_CallsLaneOnce()
-        {
-            await _mockAppController.Start();
-            await _autoPickAppController.Start();
-            await _autoPickAppController.SetLane("supp");
-
-            await _mockAppController.EnterLockedScreen();
-            await Task.Delay(5_000);
-
-            Assert.Equal(State.Locked, await _autoPickAppController.GetState());
-            Assert.Collection(await _mockAppController.GetChatLines(),
-                              line => Assert.Equal("supp", line));
         }
 
         [Fact(Timeout = 5_000)]

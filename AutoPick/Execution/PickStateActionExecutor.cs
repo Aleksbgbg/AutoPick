@@ -16,6 +16,7 @@
             await clientExecutor.CallLane(_userConfiguration.LaneName);
             await clientExecutor.CallLane(_userConfiguration.LaneName);
             await clientExecutor.PickChampion(_userConfiguration.ChampionName);
+            await clientExecutor.CallLane(_userConfiguration.LaneName);
         }
     }
 }
