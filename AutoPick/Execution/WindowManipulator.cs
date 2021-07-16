@@ -15,6 +15,7 @@
     {
         private const int ShortDelayMs = 100;
         private const int LongDelayMs = 200;
+        private const int ExtraLongDelayMs = 1_000;
 
         private readonly StateDetector _stateDetector;
 
@@ -146,7 +147,7 @@
             await FlushAndDelay(inputQueue, ShortDelayMs);
 
             inputQueue.TypeText(championName);
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, ExtraLongDelayMs);
 
             inputQueue.ClickMouse(_clickPoints.FirstChampionSelectionImage);
             await FlushAndDelay(inputQueue, LongDelayMs);

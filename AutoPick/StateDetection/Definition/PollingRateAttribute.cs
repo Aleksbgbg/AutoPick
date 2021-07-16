@@ -4,6 +4,8 @@
 
     public static class PollingRates
     {
+        public const int VerySlow = 10_000;
+        public const int Slow = 2_000;
         public const int Fast = 1_000;
         public const int VeryFast = 200;
     }

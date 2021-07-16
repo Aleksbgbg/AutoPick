@@ -7,10 +7,10 @@
     [CombinedDetectors(Pick, Selected)]
     public enum State
     {
-        [PollingRate(PollingRates.Fast)]
+        [PollingRate(PollingRates.Slow)]
         Idle = 0,
 
-        [PollingRate(PollingRates.Fast)]
+        [PollingRate(PollingRates.Slow)]
         [Detector(SearchAlgorithm.Convolution, "Lobby.png", 441, 680, 10, 10, Threshold = 0.73f)]
         Lobby,
 
@@ -64,11 +64,11 @@
         [Detector(SearchAlgorithm.Convolution, "Locked.png", 833, 675, 18, 18, Threshold = 0.78f)]
         Locked,
 
-        [PollingRate(PollingRates.Fast)]
+        [PollingRate(PollingRates.VerySlow)]
         [Detector(SearchAlgorithm.Convolution, "InGame.png", 1135, 52, 61, 11, Threshold = 0.7f)]
         InGame,
 
-        [PollingRate(PollingRates.Fast)]
+        [PollingRate(PollingRates.Slow)]
         NotLaunched,
 
         [PollingRate(PollingRates.Fast)]
