@@ -24,7 +24,10 @@ DPI scaling is supported, however any physical resolution bigger than 2560x1440 
 
 Scaled resolutions where the client has a physical resolution not listed in the common resolutions are likely to work but not guaranteed. If it doesn't work for you, file an issue and try a different client resolution for the time being.
 
-All physical resolutions above 1024x576 are enabled. If you are using a resolution below 1024x576 please tell me how you managed to achieve that :).
+Scaled resolutions explicitly supported:
+- `1537x865` (`1024x576` scaled at 150%)
+
+All physical resolutions above and including 1024x576 are enabled. If you are using a resolution below 1024x576 please tell me how you managed to achieve that :).
 
 A resolution is fully supported when all tests pass after the following changes are made:
 1. The following basic screens are added to `AutoPick.Tests/TestImages/{resolution}/BasicScreens`:
