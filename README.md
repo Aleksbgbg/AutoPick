@@ -47,14 +47,17 @@ A resolution is fully supported when all tests pass after the following changes 
    - `[10]Locked.png`
    - `[11]InGame.png`
   
-  Note that `[7]ConnectingEarly.png` and `[10]LockedHover.png`, present in the default resolution, are _not_ required.
+  Note that `[10]LockedHover.png`, present in the default resolution, is _not_ required.
 
 2. 2 varying frames containing the champ select blue text, and 1 blank transition frame are added to `AutoPick.Tests/TestImages/{resolution}/ChampSelectTransitionFrames`.
 
 3. 5 connecting transition frames (distributed well between starting and finishing the transition) are added to `AutoPick.Tests/TestImages/{resolution}/ConnectingTransitionFrames`.
 
-4. An identical copy of the screens in #1 is added to `MockApp/Screens/{resolution}`, named `1.png` - `15.png`. Screens `[7]ConnectingEarly.png` and `[10]LockedHover.png` are not used.
+4. An identical copy of the screens in #1 is added to `MockApp/Screens/{resolution}`, named `1.png` - `15.png`. `[10]LockedHover.png` is not used.
 
 5. A parameterised test case is added to `AutoPick.Tests/EndToEnd/EndToEndTest.cs` with the resolution parameters.
 
 Check tests for the base resolution `1280x720` to verify what these images look like.
+
+## Known Unsupported States
+- The first few frames of connecting have a different font before League lods the fonts. This is currently not supported as it's only a few frames and is usually not detected.

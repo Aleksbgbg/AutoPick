@@ -7,7 +7,7 @@
     [CombinedDetectors(Pick, Selected)]
     public enum State
     {
-        [PollingRate(PollingRates.Slow)]
+        [PollingRate(PollingRates.Fast)] // Important to leave fast in case a state is incorrectly missed
         Idle = 0,
 
         [PollingRate(PollingRates.Slow)]
@@ -46,10 +46,6 @@
         [PollingRate(PollingRates.VeryFast)]
         // Changed location to aid detection when window resized; original = 32, 644, 72, 10
         [Detector(SearchAlgorithm.Convolution, "Connecting.png", 28, 640, 80, 20, Threshold = 0.65f)]
-        // Connecting screen before fonts have loaded - this is a rare case.
-        // It is here purely for heuristic reasons; it is not guaranteed to work or be supported, but this is okay
-        // because it doesn't interfere with normal operation.
-        [Detector(SearchAlgorithm.Convolution, "ConnectingEarly.png", 32, 644, 67, 12)]
         Connecting,
 
         [ZOrder(0)]
