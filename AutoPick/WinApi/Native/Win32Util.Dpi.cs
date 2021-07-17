@@ -19,13 +19,13 @@
 
     public static partial class Win32Util
     {
-        [DllImport(User32Dll, SetLastError = true)]
+        [DllImport(User32Dll, SetLastError = SetLastError)]
         public static extern bool SetProcessDpiAwarenessContext(int dpiFlag);
 
-        [DllImport(ShCoreDll, SetLastError = true)]
+        [DllImport(ShCoreDll, SetLastError = SetLastError)]
         public static extern bool SetProcessDpiAwareness(PROCESS_DPI_AWARENESS awareness);
 
-        [DllImport(User32Dll)]
+        [DllImport(User32Dll, SetLastError = SetLastError)]
         public static extern bool SetProcessDPIAware();
     }
 }
