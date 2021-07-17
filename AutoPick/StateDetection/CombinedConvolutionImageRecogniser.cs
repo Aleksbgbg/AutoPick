@@ -2,8 +2,7 @@
 {
     using System.Linq;
     using AutoPick.StateDetection.Definition;
-    using Emgu.CV;
-    using Emgu.CV.Structure;
+    using AutoPick.StateDetection.Imaging;
 
     public class CombinedConvolutionImageRecogniser : IImageRecogniser
     {
@@ -16,11 +15,11 @@
 
         public State State { get; private set; }
 
-        public bool IsMatch(Image<Gray, byte> image)
+        public bool IsMatch(IImage image)
         {
             var results = _recognisers.Select(recogniser => recogniser.HighestMatch(image))
-                                .Where(result => result.SurpassesThreshold)
-                                .ToArray();
+                                      .Where(result => result.SurpassesThreshold)
+                                      .ToArray();
 
             if (results.Length == 0)
             {

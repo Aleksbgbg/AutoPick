@@ -2,15 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using AutoPick.Execution;
     using AutoPick.StateDetection.Definition;
-    using Emgu.CV;
-    using Emgu.CV.CvEnum;
-    using Emgu.CV.Structure;
+    using AutoPick.StateDetection.Imaging;
 
     public class StateDetector
     {
@@ -23,18 +20,18 @@
                                                     .ToArray();
         }
 
-        public State Detect(Image<Gray, byte> image)
+        public State Detect(IImage image)
         {
             if ((image.Width != AutoPicker.DefaultWindowWidth) || (image.Height != AutoPicker.DefaultWindowHeight))
             {
                 return DetectInternal(
-                    image.Resize(AutoPicker.DefaultWindowWidth, AutoPicker.DefaultWindowHeight, Inter.Lanczos4));
+                    image.Resize(AutoPicker.DefaultWindowWidth, AutoPicker.DefaultWindowHeight));
             }
 
             return DetectInternal(image);
         }
 
-        private State DetectInternal(Image<Gray, byte> image)
+        private State DetectInternal(IImage image)
         {
             foreach (IImageRecogniser recogniser in _imageRecognisers)
             {
@@ -88,14 +85,14 @@
             return detector.SearchAlgorithm switch
             {
                 SearchAlgorithm.Convolution => new ConvolutionImageRecogniser(
-                    state, LoadImage(detector.TemplateImage), detector.SearchLocation, detector.Threshold),
+                    state, LoadTemplate(detector.TemplateImage), detector.SearchLocation, detector.Threshold),
                 SearchAlgorithm.ExactPixelMatch => new ExactPixelMatchImageRecogniser(
-                    state, LoadImage(detector.TemplateImage), detector.SearchLocation),
+                    state, LoadTemplate(detector.TemplateImage), detector.SearchLocation),
                 var _ => throw new InvalidOperationException("Unimplemented search algorithm")
             };
         }
 
-        private static Image<Gray, byte> LoadImage(string name)
+        private static ITemplate LoadTemplate(string name)
         {
             using Stream? stream = Assembly.GetExecutingAssembly()
                                            .GetManifestResourceStream($"AutoPick.DetectionImages.{name}");
@@ -105,7 +102,7 @@
                 throw new InvalidOperationException($"Could not find detection image {name}");
             }
 
-            return ((Bitmap) Image.FromStream(stream)).ToImage<Gray, byte>();
+            return ImageFactory.TemplateFromStream(stream);
         }
 
         private class DetectorInfo

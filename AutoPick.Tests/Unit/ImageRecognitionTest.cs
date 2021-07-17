@@ -2,8 +2,7 @@
 {
     using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
-    using Emgu.CV;
-    using Emgu.CV.Structure;
+    using AutoPick.StateDetection.Imaging;
     using Xunit;
 
     public class ImageRecognitionTest
@@ -14,7 +13,7 @@
         [MemberData(nameof(TestImages.BasicScreens), MemberType = typeof(TestImages))]
         public void RecognisesBasicScreen(string image, State expectedState)
         {
-            State actualState = _stateDetector.Detect(new Image<Gray, byte>(image));
+            State actualState = _stateDetector.Detect(ImageFactory.ScreenshotFromPath(image));
 
             Assert.Equal(expectedState, actualState);
         }
@@ -23,7 +22,7 @@
         [MemberData(nameof(TestImages.ChampSelectTransitionImages), MemberType = typeof(TestImages))]
         public void RecognisesChampSelectTransitionScreen(string image)
         {
-            State actualState = _stateDetector.Detect(new Image<Gray, byte>(image));
+            State actualState = _stateDetector.Detect(ImageFactory.ScreenshotFromPath(image));
 
             Assert.Equal(State.ChampSelectTransition, actualState);
         }
@@ -32,7 +31,7 @@
         [MemberData(nameof(TestImages.ConnectionTransitionImages), MemberType = typeof(TestImages))]
         public void RecognisesConnectingScreen(string image)
         {
-            State actualState = _stateDetector.Detect(new Image<Gray, byte>(image));
+            State actualState = _stateDetector.Detect(ImageFactory.ScreenshotFromPath(image));
 
             Assert.Equal(State.Connecting, actualState);
         }

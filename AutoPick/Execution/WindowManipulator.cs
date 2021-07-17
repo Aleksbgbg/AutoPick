@@ -6,10 +6,9 @@
     using AutoPick.DebugTools;
     using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
+    using AutoPick.StateDetection.Imaging;
     using AutoPick.WinApi;
     using AutoPick.WinApi.Native;
-    using Emgu.CV;
-    using Emgu.CV.Structure;
 
     public class WindowManipulator : ILeagueClientManipulator
     {
@@ -171,10 +170,10 @@
             return Task.Delay(delayMs);
         }
 
-        private Image<Gray, byte> TakeSnapshot()
+        private IImage TakeSnapshot()
         {
             Win32Util.PrintWindow(_window, _targetDeviceContext, PrintWindowParam.PW_CLIENTONLY);
-            return Image.FromHbitmap(_bitmap).ToImage<Gray, byte>();
+            return ImageFactory.ScreenshotFromBitmapHandle(_bitmap);
         }
 
         private static IntPtr FindLeagueWindow()

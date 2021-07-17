@@ -2,21 +2,19 @@
 {
     using System.Drawing;
     using AutoPick.StateDetection.Definition;
-    using Emgu.CV;
-    using Emgu.CV.CvEnum;
-    using Emgu.CV.Structure;
+    using AutoPick.StateDetection.Imaging;
 
     public class ConvolutionImageRecogniser : IImageRecogniser
     {
         public const float DefaultThreshold = 0.97f;
 
-        private readonly Image<Gray, byte> _template;
+        private readonly ITemplate _template;
 
         private readonly Rectangle _targetLocation;
 
         private readonly float _threshold;
 
-        public ConvolutionImageRecogniser(State state, Image<Gray, byte> template, Rectangle targetLocation, float threshold)
+        public ConvolutionImageRecogniser(State state, ITemplate template, Rectangle targetLocation, float threshold)
         {
             _template = template;
             _targetLocation = targetLocation;
@@ -26,17 +24,16 @@
 
         public State State { get; }
 
-        public bool IsMatch(Image<Gray, byte> image)
+        public bool IsMatch(IImage image)
         {
-            Image<Gray, float> match =  image.GetSubRect(_targetLocation)
-                                             .MatchTemplate(_template, TemplateMatchingType.CcoeffNormed);
+            ITemplateMatchResult match =  image.GetSubRect(_targetLocation)
+                                               .MatchTemplate(_template);
 
-            float[,,] matches = match.Data;
-            for (int y = 0; y < matches.GetLength(0); y++)
+            for (int x = 0; x < match.Width; ++x)
             {
-                for (int x = 0; x < matches.GetLength(1); x++)
+                for (int y = 0; y < match.Height; ++y)
                 {
-                    float matchScore = matches[y, x, 0];
+                    float matchScore = match[x, y];
 
                     if (matchScore > _threshold)
                     {
@@ -48,20 +45,19 @@
             return false;
         }
 
-        public HighestMatchResult HighestMatch(Image<Gray, byte> image)
+        public HighestMatchResult HighestMatch(IImage image)
         {
-            Image<Gray, float> match =  image.GetSubRect(_targetLocation)
-                                             .MatchTemplate(_template, TemplateMatchingType.CcoeffNormed);
+            ITemplateMatchResult match =  image.GetSubRect(_targetLocation)
+                                               .MatchTemplate(_template);
 
             float highestMatch = float.MinValue;
             bool surpassesThreshold = false;
 
-            float[,,] matches = match.Data;
-            for (int y = 0; y < matches.GetLength(0); y++)
+            for (int x = 0; x < match.Width; ++x)
             {
-                for (int x = 0; x < matches.GetLength(1); x++)
+                for (int y = 0; y < match.Height; ++y)
                 {
-                    float matchScore = matches[y, x, 0];
+                    float matchScore = match[x, y];
 
                     if (matchScore > highestMatch)
                     {
