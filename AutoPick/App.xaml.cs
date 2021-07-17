@@ -2,8 +2,10 @@
 {
     using System;
     using System.Windows;
+    using System.Windows.Media.Imaging;
     using AutoPick.DebugTools;
     using AutoPick.Execution;
+    using AutoPick.StateDetection.Imaging;
     using AutoPick.ViewModels;
     using AutoPick.Views;
     using AutoPick.WinApi;
@@ -13,13 +15,17 @@
     {
         private readonly SingleInstance _singleInstance = new();
 
-        private readonly MainViewModel _mainViewModel = new();
+        private readonly WriteableBitmap _screenshotRenderSurface;
+
+        private readonly MainViewModel _mainViewModel;
 
         private readonly DiskDataStore _dataStore;
 
         public App()
         {
-            _dataStore = new(_mainViewModel);
+            _screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
+            _mainViewModel = new MainViewModel(_screenshotRenderSurface);
+            _dataStore = new DiskDataStore(_mainViewModel);
         }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -49,7 +55,8 @@
             };
             mainWindow.Show();
 
-            AutoPicker autoPicker = AutoPicker.Run(_mainViewModel, _mainViewModel, _mainViewModel);
+            ScreenshotPreviewRenderer screenshotPreviewRenderer = new(_screenshotRenderSurface);
+            AutoPicker autoPicker = AutoPicker.Run(_mainViewModel, _mainViewModel, screenshotPreviewRenderer);
 
             HotKey.Factory hotKeyFactory = HotKey.Factory.For(mainWindow);
 

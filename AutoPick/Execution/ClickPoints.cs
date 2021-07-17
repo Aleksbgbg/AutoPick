@@ -19,8 +19,7 @@
 
         public ClickPoints(Size resolution)
         {
-            if ((resolution.Width == AutoPicker.DefaultWindowWidth)
-                && (resolution.Height == AutoPicker.DefaultWindowHeight))
+            if (resolution == AutoPicker.DefaultWindowSize)
             {
                 AcceptButton = AcceptButtonDefaultLocation;
                 ChatBox = ChatBoxDefaultLocation;
@@ -55,12 +54,12 @@
 
         private static int ScaleX(double value, double newResolution)
         {
-            return Scale(value, newResolution, AutoPicker.DefaultWindowWidth);
+            return Scale(value, newResolution, AutoPicker.DefaultWindowSize.Width);
         }
 
         private static int ScaleY(double value, double newResolution)
         {
-            return Scale(value, newResolution, AutoPicker.DefaultWindowHeight);
+            return Scale(value, newResolution, AutoPicker.DefaultWindowSize.Height);
         }
 
         private static int Scale(double value, double newScale, double originalScale)

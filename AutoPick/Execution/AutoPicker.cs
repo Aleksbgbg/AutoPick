@@ -1,50 +1,54 @@
 ﻿namespace AutoPick.Execution
 {
     using System;
+    using System.Drawing;
     using System.Threading.Tasks;
     using AutoPick.DebugTools;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.WinApi.Native;
+    using AutoPick.StateDetection.Imaging;
+    using AutoPick.Util;
 
     public class AutoPicker
     {
-        public const int DefaultWindowWidth = 1280;
-        public const int DefaultWindowHeight = 720;
+        public static readonly Size DefaultWindowSize = new(1280, 720);
 
         private readonly Config _config;
 
         private readonly PerStateActionExecutor _actionExecutor;
 
-        private readonly IStateConsumer _stateConsumer;
-        private readonly IBitmapConsumer _bitmapConsumer;
+        private readonly IDetectionInfoConsumer _detectionInfoConsumer;
+
+        private readonly ScreenshotPreviewRenderer _screenshotPreviewRenderer;
 
         private WindowManipulator? _windowManipulator;
 
-        private Win32Rect _windowSize;
+        private Size _windowSize;
 
         private bool _enabled = true;
 
         private AutoPicker(
             Config config,
             PerStateActionExecutor actionExecutor,
-            IStateConsumer stateConsumer,
-            IBitmapConsumer bitmapConsumer)
+            IDetectionInfoConsumer detectionInfoConsumer,
+            ScreenshotPreviewRenderer screenshotPreviewRenderer)
         {
             _config = config;
             _actionExecutor = actionExecutor;
-            _stateConsumer = stateConsumer;
-            _bitmapConsumer = bitmapConsumer;
+            _detectionInfoConsumer = detectionInfoConsumer;
+            _screenshotPreviewRenderer = screenshotPreviewRenderer;
         }
 
         public static AutoPicker Run(
-            IUserConfiguration userConfiguration, IStateConsumer stateConsumer, IBitmapConsumer bitmapConsumer)
+            IUserConfiguration userConfiguration,
+            IDetectionInfoConsumer detectionInfoConsumer,
+            ScreenshotPreviewRenderer screenshotPreviewRenderer)
         {
             PerStateActionExecutor perStateActionExecutor = new();
             perStateActionExecutor.RegisterAction(State.Accept, new AcceptStateActionExecutor());
             perStateActionExecutor.RegisterAction(State.Pick, new PickStateActionExecutor(userConfiguration));
             perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
 
-            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, stateConsumer, bitmapConsumer);
+            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, detectionInfoConsumer, screenshotPreviewRenderer);
             Task.Factory.StartNew(autoPicker.LoopThread, TaskCreationOptions.LongRunning);
 
             return autoPicker;
@@ -73,18 +77,7 @@
                     State state = _enabled ? DetectState() : State.Disabled;
 
                     Task action = RunTakeActionThread(state);
-                    RunStateReportThread(state);
-
-                #if DEBUG
-                    Task.Run(() =>
-                    {
-                        if (_windowManipulator != null)
-                        {
-                            _bitmapConsumer.Consume(_windowManipulator.LastScreenshot());
-                        }
-                    });
-                #endif
-
+                    RunUiUpdateThread(new DetectionInfo(state, _windowSize));
                     await action;
 
                 #if DEBUG
@@ -105,47 +98,62 @@
             return Task.Run(() => _actionExecutor.ExecuteAction(state, _windowManipulator!));
         }
 
-        private void RunStateReportThread(State state)
+        private void RunUiUpdateThread(DetectionInfo detectionInfo)
         {
-            Task.Run(() => _stateConsumer.Consume(state));
+            Task.Run(async () =>
+            {
+                _detectionInfoConsumer.Consume(detectionInfo);
+
+                await Execute.OnUiThreadAsync(() =>
+                {
+                    if ((_windowManipulator == null) || !detectionInfo.WindowAvailable)
+                    {
+                        _screenshotPreviewRenderer.Clear();
+                    }
+                    else
+                    {
+                        _windowManipulator.UpdatePreview();
+                    }
+                });
+            });
         }
 
         private State DetectState()
         {
-            if (WindowManipulator.HasWindow(out IntPtr window))
-            {
-                if (WindowManipulator.IsMinimised(window))
-                {
-                    return State.Minimised;
-                }
-
-                if (!WindowManipulator.IsValidSize(window))
-                {
-                    return State.InvalidWindowSize;
-                }
-
-                _windowManipulator ??= WindowManipulator.Create(window, _config);
-            }
-            else
+            if (!WindowManipulator.HasWindow(out IntPtr window))
             {
                 if (_windowManipulator != null)
                 {
-                    _windowManipulator.Delete();
+                    _windowManipulator.Dispose();
                     _windowManipulator = null;
                 }
 
                 return State.NotLaunched;
             }
 
-            Win32Rect currentWindowSize = WindowManipulator.GetWindowSize(window);
-
-            if ((currentWindowSize.Width != _windowSize.Width) || (currentWindowSize.Height != _windowSize.Height))
+            if (WindowManipulator.IsMinimised(window))
             {
-                _windowManipulator.Delete();
-                _windowManipulator = WindowManipulator.Create(window, _config);
+                return State.Minimised;
             }
 
-            _windowSize = currentWindowSize;
+            if (!WindowManipulator.IsValidSize(window))
+            {
+                return State.InvalidWindowSize;
+            }
+
+            Size currentWindowSize = WindowManipulator.GetWindowSize(window);
+
+            if (_windowManipulator == null)
+            {
+                _windowManipulator = WindowManipulator.Create(window, _config, _screenshotPreviewRenderer);
+                _windowSize = currentWindowSize;
+            }
+            else if (_windowSize != currentWindowSize)
+            {
+                _windowManipulator.Dispose();
+                _windowManipulator = WindowManipulator.Create(window, _config, _screenshotPreviewRenderer);
+                _windowSize = currentWindowSize;
+            }
 
             return _windowManipulator.DetectWindowState();
         }

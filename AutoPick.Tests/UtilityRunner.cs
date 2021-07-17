@@ -71,14 +71,14 @@
             matchRegion.Save(outputPath);
         }
 
-        [Theory(Skip = SkipReason)]
-        [InlineData(@"A:\Programming\AutoPick\AutoPick.Tests\TestImages\1280x720\BasicScreens\[8]Pick.png",
-                    @"A:\Programming\AutoPick\AutoPick\DetectionImages\Pick.png",
+        [Theory]
+        [InlineData(@"A:\Programming\AutoPick\AutoPick.Tests\TestImages\1280x720\BasicScreens\[9]SelectedHover.png",
+                    @"A:\Programming\AutoPick\AutoPick\DetectionImages\SelectedHover.png",
                     555, 588, 172, 42)]
         public void CutImage(string sourceImage, string outputPath, int matchX, int matchY, int width, int height)
         {
-            Image<Rgb, byte> source = new(sourceImage);
-            Image<Rgb, byte> target = new(new Size(width, height));
+            Image<Gray, byte> source = new(sourceImage);
+            Image<Gray, byte> target = new(new Size(width, height));
 
             for (int x = 0; x < width; ++x)
             {

@@ -14,7 +14,63 @@
         <TextBox Text="{Binding ChampText, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBlock Text="Lane"/>
         <TextBox Text="{Binding LaneText, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock Text="{Binding State, StringFormat=State: {0}}"/>
-        <Image Source="{Binding Source}" MaxWidth="1280" MaxHeight="720"/>
+        <TextBlock Text="{Binding DetectionInfo.State, StringFormat=State: {0}}"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Image Grid.ColumnSpan="2" Grid.RowSpan="2"
+                   Source="{Binding ScreenshotPreviewSource}"
+                   MaxWidth="640" MaxHeight="360"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.RowSpan="2"
+                       TextAlignment="Center" VerticalAlignment="Center"
+                       FontSize="48" Foreground="White"
+                       Text="Window Unavailable">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DetectionInfo.WindowAvailable}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Grid.Row="1" Foreground="White" TextAlignment="Right"
+                       Text="{Binding DetectionInfo.WindowSize.Width}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DetectionInfo.WindowAvailable}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Grid.Column="1" Foreground="White"
+                       Text="{Binding DetectionInfo.WindowSize.Height}">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90"/>
+                </TextBlock.LayoutTransform>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DetectionInfo.WindowAvailable}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
     </StackPanel>
 </Window>

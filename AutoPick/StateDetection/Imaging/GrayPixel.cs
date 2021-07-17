@@ -2,11 +2,11 @@
 {
     using Emgu.CV.Structure;
 
-    public class EmguCvGrayPixel : IPixel
+    public class GrayPixel : IPixel
     {
         private readonly Gray _gray;
 
-        public EmguCvGrayPixel(Gray gray)
+        public GrayPixel(Gray gray)
         {
             _gray = gray;
         }
@@ -33,10 +33,10 @@
                 return false;
             }
 
-            return Equals((EmguCvGrayPixel)obj);
+            return Equals((GrayPixel)obj);
         }
 
-        private bool Equals(EmguCvGrayPixel other)
+        private bool Equals(GrayPixel other)
         {
             return _gray.Equals(other._gray);
         }

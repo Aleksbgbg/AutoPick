@@ -10,31 +10,63 @@
     using AutoPick.WinApi;
     using AutoPick.WinApi.Native;
 
-    public class WindowManipulator : ILeagueClientManipulator
+    public class WindowManipulator : IDisposable, ILeagueClientManipulator
     {
         private const int ShortDelayMs = 100;
         private const int LongDelayMs = 200;
         private const int ExtraLongDelayMs = 1_000;
 
-        private readonly StateDetector _stateDetector;
-
         private readonly ClickPoints _clickPoints;
+
+        private readonly ScreenshotGenerator _screenshotGenerator;
+
+        private readonly StateDetector _stateDetector;
 
         private readonly IntPtr _window;
 
-        private readonly IntPtr _sourceDeviceContext;
         private readonly IntPtr _targetDeviceContext;
+        private readonly IntPtr _bitmapHandle;
 
-        private readonly IntPtr _bitmap;
-
-        private WindowManipulator(StateDetector stateDetector, ClickPoints clickPoints, IntPtr window, IntPtr sourceDeviceContext, IntPtr targetDeviceContext, IntPtr bitmap)
+        private WindowManipulator(
+            ClickPoints clickPoints,
+            ScreenshotGenerator screenshotGenerator,
+            StateDetector stateDetector,
+            IntPtr window,
+            IntPtr targetDeviceContext,
+            IntPtr bitmapHandle)
         {
-            _stateDetector = stateDetector;
             _clickPoints = clickPoints;
+            _screenshotGenerator = screenshotGenerator;
+            _stateDetector = stateDetector;
             _window = window;
-            _sourceDeviceContext = sourceDeviceContext;
             _targetDeviceContext = targetDeviceContext;
-            _bitmap = bitmap;
+            _bitmapHandle = bitmapHandle;
+        }
+
+        ~WindowManipulator()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            ReleaseUnmanagedResources();
+            if (disposing)
+            {
+                _screenshotGenerator.Dispose();
+            }
+        }
+
+        private void ReleaseUnmanagedResources()
+        {
+            Win32Util.DeleteObject(_bitmapHandle);
+            Win32Util.DeleteDC(_targetDeviceContext);
         }
 
         public static bool HasWindow(out IntPtr window)
@@ -48,52 +80,49 @@
             return Win32Util.IsIconic(window);
         }
 
-        public static Win32Rect GetWindowSize(IntPtr window)
+        public static Size GetWindowSize(IntPtr window)
         {
             Win32Util.GetWindowRect(window, out Win32Rect windowRect);
-            return windowRect;
+            return windowRect.ToSize();
         }
 
         public static bool IsValidSize(IntPtr window)
         {
-            Win32Rect windowSize = GetWindowSize(window);
+            Size windowSize = GetWindowSize(window);
             return (windowSize.Width >= 1024) && (windowSize.Height >= 576);
         }
 
-        public static WindowManipulator Create(IntPtr window, Config config)
+        public static WindowManipulator Create(IntPtr window, Config config,
+                                               ScreenshotPreviewRenderer screenshotPreviewRenderer)
         {
+            Size windowSize = GetWindowSize(window);
+
             IntPtr sourceDeviceContext = Win32Util.GetDC(window);
             IntPtr targetDeviceContext = Win32Util.CreateCompatibleDC(sourceDeviceContext);
 
-            Win32Rect windowSize = GetWindowSize(window);
+            IntPtr bitmapHandle = Win32Util.CreateCompatibleBitmap(sourceDeviceContext, windowSize.Width, windowSize.Height);
+            Win32Util.SelectObject(targetDeviceContext, bitmapHandle);
 
-            IntPtr bitmap = Win32Util.CreateCompatibleBitmap(sourceDeviceContext, windowSize.Width, windowSize.Height);
-            Win32Util.SelectObject(targetDeviceContext, bitmap);
+            Win32Util.ReleaseDC(window, sourceDeviceContext);
 
             return new WindowManipulator(
+                new ClickPoints(windowSize),
+                new ScreenshotGenerator(windowSize, screenshotPreviewRenderer),
                 new StateDetector(config),
-                new ClickPoints(new Size(windowSize.Width, windowSize.Height)),
-                window, sourceDeviceContext, targetDeviceContext, bitmap);
-        }
-
-        public void Delete()
-        {
-            Win32Util.DeleteObject(_bitmap);
-            Win32Util.DeleteDC(_targetDeviceContext);
-            Win32Util.ReleaseDC(_window, _sourceDeviceContext);
+                window,
+                targetDeviceContext,
+                bitmapHandle);
         }
 
         public State DetectWindowState()
         {
-            return _stateDetector.Detect(TakeSnapshot());
+            return _stateDetector.Detect(TakeFreshWindowSnapshot());
         }
 
-    #if DEBUG
-        public Bitmap LastScreenshot()
+        public void UpdatePreview()
         {
-            return Image.FromHbitmap(_bitmap);
+            _screenshotGenerator.UpdateWindowPreview();
         }
-    #endif
 
         public void AttemptToBringLeagueToForeground()
         {
@@ -170,10 +199,11 @@
             return Task.Delay(delayMs);
         }
 
-        private IImage TakeSnapshot()
+        private IImage TakeFreshWindowSnapshot()
         {
             Win32Util.PrintWindow(_window, _targetDeviceContext, PrintWindowParam.PW_CLIENTONLY);
-            return ImageFactory.ScreenshotFromBitmapHandle(_bitmap);
+            _screenshotGenerator.UpdateWindowSnapshot(Image.FromHbitmap(_bitmapHandle));
+            return _screenshotGenerator.RetrieveSearchImage();
         }
 
         private static IntPtr FindLeagueWindow()

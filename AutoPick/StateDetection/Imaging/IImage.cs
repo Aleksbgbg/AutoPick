@@ -4,13 +4,7 @@
 
     public interface IImage
     {
-        int Width { get; }
-
-        int Height { get; }
-
         IPixel this[Point point] { get; }
-
-        IImage Resize(int width, int height);
 
         IImage GetSubRect(Rectangle rect);
 

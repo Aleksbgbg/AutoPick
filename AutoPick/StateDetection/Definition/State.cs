@@ -54,7 +54,7 @@
         Pick,
 
         [PollingRate(PollingRates.Fast)]
-        [Detector(SearchAlgorithm.Convolution, "Selected.png", 555, 588, 172, 42, Threshold = 0.79f)]
+        [Detector(SearchAlgorithm.Convolution, "SelectedHover.png", 555, 588, 172, 42, Threshold = 0.80f)]
         Selected,
 
         [PollingRate(PollingRates.Fast)]

@@ -3,11 +3,11 @@
     using Emgu.CV;
     using Emgu.CV.Structure;
 
-    public class EmguCvTemplateMatchResult : ITemplateMatchResult
+    public class TemplateMatchResult : ITemplateMatchResult
     {
         private readonly Image<Gray, float> _templateMatchResult;
 
-        public EmguCvTemplateMatchResult(Image<Gray, float> templateMatchResult)
+        public TemplateMatchResult(Image<Gray, float> templateMatchResult)
         {
             _templateMatchResult = templateMatchResult;
         }

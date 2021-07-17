@@ -1,14 +1,16 @@
 ﻿namespace AutoPick.ViewModels
 {
     using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
     using System.Windows.Media.Imaging;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.Util;
 
-    public class MainViewModel : ViewModelBase, IUserConfiguration, IStateConsumer, IBitmapConsumer
+    public class MainViewModel : ViewModelBase, IUserConfiguration, IDetectionInfoConsumer
     {
+        public MainViewModel(BitmapSource screenshotPreviewSource)
+        {
+            ScreenshotPreviewSource = screenshotPreviewSource;
+        }
+
         private string _champText = string.Empty;
         public string ChampText
         {
@@ -43,66 +45,32 @@
             }
         }
 
-        private State _state;
-        public State State
+        private DetectionInfo _detectionInfo = new(State.NotLaunched, Size.Empty);
+        public DetectionInfo DetectionInfo
         {
-            get => _state;
+            get => _detectionInfo;
 
             private set
             {
-                if (_state == value)
+                if (_detectionInfo == value)
                 {
                     return;
                 }
 
-                _state = value;
+                _detectionInfo = value;
                 NotifyPropertyChanged();
             }
         }
 
-        private BitmapImage? _source;
-        public BitmapImage? Source
-        {
-            get => _source;
-
-            private set
-            {
-                if (_source == value)
-                {
-                    return;
-                }
-
-                _source = value;
-                NotifyPropertyChanged();
-            }
-        }
+        public BitmapSource ScreenshotPreviewSource { get; }
 
         string IUserConfiguration.LaneName => LaneText;
 
         string IUserConfiguration.ChampionName => ChampText;
 
-        public void Consume(State state)
+        public void Consume(DetectionInfo detectionInfo)
         {
-            State = state;
-        }
-
-        public void Consume(Bitmap bitmap)
-        {
-            Execute.OnUiThread(() =>
-            {
-                using MemoryStream memory = new();
-
-                bitmap.Save(memory, ImageFormat.Bmp);
-                memory.Position = 0;
-
-                BitmapImage bitmapImage = new();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-
-                Source = bitmapImage;
-            });
+            DetectionInfo = detectionInfo;
         }
     }
 }

@@ -5,7 +5,6 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using AutoPick.Execution;
     using AutoPick.StateDetection.Definition;
     using AutoPick.StateDetection.Imaging;
 
@@ -21,17 +20,6 @@
         }
 
         public State Detect(IImage image)
-        {
-            if ((image.Width != AutoPicker.DefaultWindowWidth) || (image.Height != AutoPicker.DefaultWindowHeight))
-            {
-                return DetectInternal(
-                    image.Resize(AutoPicker.DefaultWindowWidth, AutoPicker.DefaultWindowHeight));
-            }
-
-            return DetectInternal(image);
-        }
-
-        private State DetectInternal(IImage image)
         {
             foreach (IImageRecogniser recogniser in _imageRecognisers)
             {

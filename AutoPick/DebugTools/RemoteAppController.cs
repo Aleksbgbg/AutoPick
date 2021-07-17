@@ -111,7 +111,7 @@ namespace AutoPick.DebugTools
         private async Task<byte[]> GetState()
         {
             await _detectionUpdateWaiter.Wait();
-            return new[] {(byte)_mainViewModel.State};
+            return new[] {(byte)_mainViewModel.DetectionInfo.State};
         }
     }
 }
