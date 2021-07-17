@@ -9,7 +9,7 @@
 
     public class MainViewModel : ViewModelBase, IUserConfiguration, IStateConsumer, IBitmapConsumer
     {
-        private string _champText = "Katarina";
+        private string _champText = string.Empty;
         public string ChampText
         {
             get => _champText;
@@ -26,7 +26,7 @@
             }
         }
 
-        private string _laneText = "mid";
+        private string _laneText = string.Empty;
         public string LaneText
         {
             get => _laneText;
