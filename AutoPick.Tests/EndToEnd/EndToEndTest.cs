@@ -233,16 +233,6 @@
             Assert.Equal(State.Selected, await _autoPickAppController.GetState());
             Assert.True(await _mockAppController.HasLockedIn());
             Assert.False(IsTopmost(leagueWindow));
-
-            // Locked screen
-            await _mockAppController.EnterLobbyScreen();
-            await _autoPickAppController.SetLane("top");
-
-            await _mockAppController.EnterLockedScreen();
-
-            Assert.Equal(State.Locked, await _autoPickAppController.GetState());
-            Assert.Equal("top", await _mockAppController.GetLastChatLine());
-            Assert.False(IsTopmost(leagueWindow));
         }
 
         private static bool IsTopmost(IntPtr window)
@@ -281,7 +271,29 @@
             Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
         }
 
-        // Flaky
+        [Fact]
+        public async Task StoresChampionAndLaneOnShutdown()
+        {
+            await _autoPickAppController.Start();
+
+            await _autoPickAppController.SetChampion("Ahri");
+            await _autoPickAppController.SetLane("top");
+            await _autoPickAppController.Shutdown();
+
+            await _autoPickAppController.Start();
+            Assert.Equal("Ahri", await _autoPickAppController.GetChampion());
+            Assert.Equal("top", await _autoPickAppController.GetLane());
+
+            await _autoPickAppController.SetChampion("Jax");
+            await _autoPickAppController.SetLane("jng");
+            await _autoPickAppController.Shutdown();
+            await _autoPickAppController.Start();
+
+            Assert.Equal("Jax", await _autoPickAppController.GetChampion());
+            Assert.Equal("jng", await _autoPickAppController.GetLane());
+        }
+
+        // Flaky with lower delays
         // System is not 100% stable when fast user input events are applied, however it is sufficiently resilient
         [Fact]
         public async Task ConstantMouseMovement_DoesNotImpairActions()

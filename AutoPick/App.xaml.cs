@@ -13,6 +13,15 @@
     {
         private readonly SingleInstance _singleInstance = new();
 
+        private readonly MainViewModel _mainViewModel = new();
+
+        private readonly DiskDataStore _dataStore;
+
+        public App()
+        {
+            _dataStore = new(_mainViewModel);
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             DpiAwareness.Enable();
@@ -32,14 +41,15 @@
                 return;
             }
 
-            MainViewModel mainViewModel = new();
+            _dataStore.Load();
+
             MainWindow mainWindow = new()
             {
-                DataContext = mainViewModel
+                DataContext = _mainViewModel
             };
             mainWindow.Show();
 
-            AutoPicker autoPicker = AutoPicker.Run(mainViewModel, mainViewModel, mainViewModel);
+            AutoPicker autoPicker = AutoPicker.Run(_mainViewModel, _mainViewModel, _mainViewModel);
 
             HotKey.Factory hotKeyFactory = HotKey.Factory.For(mainWindow);
 
@@ -52,15 +62,16 @@
             deactivate.Activated += (_, _) => autoPicker.Disable();
             reactivate.Activated += (_, _) => autoPicker.Enable();
 
-#if DEBUG
+        #if DEBUG
             ErrorReporting.Init();
-            new RemoteAppController(mainWindow, mainViewModel, new DetectionUpdateWaiter(autoPicker))
+            new RemoteAppController(this, mainWindow, _mainViewModel, new DetectionUpdateWaiter(autoPicker))
                 .BeginRemoteControl();
-#endif
+        #endif
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
+            _dataStore.Save();
             _singleInstance.Release();
         }
     }

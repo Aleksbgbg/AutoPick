@@ -7,20 +7,24 @@ namespace AutoPick.DebugTools
     using System.Net.Sockets;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Windows;
     using AutoPick.Util;
     using AutoPick.ViewModels;
     using AutoPick.Views;
 
     public class RemoteAppController
     {
-        private readonly DetectionUpdateWaiter _detectionUpdateWaiter;
+        private readonly Application _application;
 
         private readonly MainViewModel _mainViewModel;
         private readonly MainWindow _mainWindow;
 
-        public RemoteAppController(MainWindow mainWindow, MainViewModel mainViewModel,
+        private readonly DetectionUpdateWaiter _detectionUpdateWaiter;
+
+        public RemoteAppController(Application application, MainWindow mainWindow, MainViewModel mainViewModel,
                                    DetectionUpdateWaiter detectionUpdateWaiter)
         {
+            _application = application;
             _mainWindow = mainWindow;
             _mainViewModel = mainViewModel;
             _detectionUpdateWaiter = detectionUpdateWaiter;
@@ -81,18 +85,24 @@ namespace AutoPick.DebugTools
             byte command = message[0];
             Span<byte> commandData = message.AsSpan(1);
 
-            if (command == 0)
+            switch (command)
             {
+            case 0:
+                ErrorReporting.ReportInfo("Ordered to shut down by remote app controller");
+                Execute.OnUiThread(() => _application.Shutdown());
+                break;
+            case 1:
                 return GetState();
-            }
-
-            if (command == 1)
-            {
+            case 2:
                 _mainViewModel.LaneText = Encoding.Unicode.GetString(commandData);
-            }
-            else if (command == 2)
-            {
+                break;
+            case 3:
                 _mainViewModel.ChampText = Encoding.Unicode.GetString(commandData);
+                break;
+            case 4:
+                return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.LaneText));
+            case 5:
+                return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.ChampText));
             }
 
             return Task.FromResult(Array.Empty<byte>());
