@@ -390,3 +390,4 @@ FodyWeavers.xsd
 
 # Release build output
 AutoPick.exe
+AutoPickData.bin
