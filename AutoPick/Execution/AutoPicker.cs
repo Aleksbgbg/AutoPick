@@ -22,7 +22,9 @@
 
         private WindowManipulator? _windowManipulator;
 
-        private Size _windowSize;
+        private IntPtr _lastWindowHandle;
+
+        private Size _lastWindowSize;
 
         private bool _enabled = true;
 
@@ -77,7 +79,7 @@
                     State state = _enabled ? DetectState() : State.Disabled;
 
                     Task action = RunTakeActionThread(state);
-                    RunUiUpdateThread(new DetectionInfo(state, _windowSize));
+                    RunUiUpdateThread(new DetectionInfo(state, _lastWindowSize));
                     await action;
 
                 #if DEBUG
@@ -143,16 +145,12 @@
 
             Size currentWindowSize = WindowManipulator.GetWindowSize(window);
 
-            if (_windowManipulator == null)
+            if ((_windowManipulator == null) || (_lastWindowHandle != window) || (_lastWindowSize != currentWindowSize))
             {
+                _windowManipulator?.Dispose();
                 _windowManipulator = WindowManipulator.Create(window, _config, _screenshotPreviewRenderer);
-                _windowSize = currentWindowSize;
-            }
-            else if (_windowSize != currentWindowSize)
-            {
-                _windowManipulator.Dispose();
-                _windowManipulator = WindowManipulator.Create(window, _config, _screenshotPreviewRenderer);
-                _windowSize = currentWindowSize;
+                _lastWindowSize = currentWindowSize;
+                _lastWindowHandle = window;
             }
 
             return _windowManipulator.DetectWindowState();

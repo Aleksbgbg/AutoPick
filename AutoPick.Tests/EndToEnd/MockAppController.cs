@@ -1,6 +1,7 @@
 ﻿namespace AutoPick.Tests.EndToEnd
 {
     using System;
+    using System.Diagnostics;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -8,7 +9,9 @@
     {
         private readonly TestProcessAndThreadManager _processManager;
 
-        private readonly AppCommunicator _appCommunicator = new();
+        private AppCommunicator _appCommunicator;
+
+        private Process _process;
 
         public MockAppController(TestProcessAndThreadManager processManager)
         {
@@ -17,8 +20,15 @@
 
         public async Task Start()
         {
-            _processManager.Start("MockApp.exe");
+            _process = _processManager.Start("MockApp.exe");
+            _appCommunicator = new AppCommunicator();
             await _appCommunicator.Connect("localhost", 5555);
+        }
+
+        public Task Shutdown()
+        {
+            _process.Kill();
+            return _process.WaitForExitAsync();
         }
 
         public Task MinimiseWindow()

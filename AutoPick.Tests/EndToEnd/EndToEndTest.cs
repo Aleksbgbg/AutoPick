@@ -166,13 +166,9 @@
             await _autoPickAppController.Start();
             await _autoPickAppController.SetLane("jng");
             await _autoPickAppController.SetChampion("Fiora");
-            IntPtr window = Win32Util.FindWindowA(null, "AutoPick");
-            Assert.NotEqual(0, window.ToInt32());
-            IntPtr disableHotkey = new(1);
-            IntPtr enableHotkey = new(2);
 
             // Disable
-            Win32Util.SendMessage(window, Message.WM_HOTKEY, disableHotkey, IntPtr.Zero);
+            SendDisableSignal();
             await _mockAppController.EnterPickScreen();
 
             Assert.Equal(State.Disabled, await _autoPickAppController.GetState());
@@ -182,7 +178,7 @@
             Assert.False(await _mockAppController.HasLockedIn());
 
             // Enable
-            Win32Util.SendMessage(window, Message.WM_HOTKEY, enableHotkey, IntPtr.Zero);
+            SendEnableSignal();
             await _mockAppController.EnterPickScreen();
 
             Assert.Equal(State.Pick, await _autoPickAppController.GetState());
@@ -190,6 +186,37 @@
             Assert.Equal("Fiora", await _mockAppController.GetSearchBoxText());
             Assert.True(await _mockAppController.HasSelectedChampion());
             Assert.True(await _mockAppController.HasLockedIn());
+        }
+
+        [Fact]
+        public async Task WindowChanged()
+        {
+            await _mockAppController.Start();
+            await _autoPickAppController.Start();
+
+            SendDisableSignal();
+            await _mockAppController.Shutdown();
+            await _mockAppController.Start();
+            SendEnableSignal();
+            await _mockAppController.EnterLobbyScreen();
+
+            Assert.Equal(State.Lobby, await _autoPickAppController.GetState());
+        }
+
+        private void SendDisableSignal()
+        {
+            IntPtr window = Win32Util.FindWindowA(null, "AutoPick");
+            Assert.NotEqual(0, window.ToInt32());
+            IntPtr disableHotkey = new(1);
+            Win32Util.SendMessage(window, Message.WM_HOTKEY, disableHotkey, IntPtr.Zero);
+        }
+
+        private void SendEnableSignal()
+        {
+            IntPtr window = Win32Util.FindWindowA(null, "AutoPick");
+            Assert.NotEqual(0, window.ToInt32());
+            IntPtr enableHotkey = new(2);
+            Win32Util.SendMessage(window, Message.WM_HOTKEY, enableHotkey, IntPtr.Zero);
         }
 
         [Fact]
