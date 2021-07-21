@@ -164,7 +164,7 @@
 
             inputQueue.TypeText(lane);
             inputQueue.PressEnter();
-            inputQueue.Flush();
+            await FlushAndDelay(inputQueue, ShortDelayMs);
         }
 
         public async Task PickChampion(string championName)
@@ -172,7 +172,7 @@
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.SearchBox);
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, LongDelayMs);
 
             inputQueue.TypeText(championName);
             await FlushAndDelay(inputQueue, ExtraLongDelayMs);
@@ -181,16 +181,14 @@
             await FlushAndDelay(inputQueue, LongDelayMs);
 
             inputQueue.ClickMouse(_clickPoints.LockInButton);
-            inputQueue.Flush();
+            await FlushAndDelay(inputQueue, ShortDelayMs);
         }
 
-        public Task LockIn()
+        public async Task LockIn()
         {
             InputQueue inputQueue = new(_window);
             inputQueue.ClickMouse(_clickPoints.LockInButton);
-            inputQueue.Flush();
-
-            return Task.CompletedTask;
+            await FlushAndDelay(inputQueue, ShortDelayMs);
         }
 
         private static Task FlushAndDelay(InputQueue inputQueue, int delayMs)
