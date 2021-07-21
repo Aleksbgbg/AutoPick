@@ -11,8 +11,8 @@
             [FieldIndex(0)]
             public string? ChampionText { get; set; }
 
-            [FieldIndex(1)]
-            public string? LaneText { get; set; }
+            [FieldIndex(2)]
+            public Lane? SelectedLane { get; set; }
         }
 
         private const string Filename = "AutoPickData.bin";
@@ -32,7 +32,7 @@
             Data data = _binaryReadWriter.Deserialize(stream);
 
             _mainViewModel.ChampText = data.ChampionText ?? "Katarina";
-            _mainViewModel.LaneText = data.LaneText ?? "mid";
+            _mainViewModel.SelectedLane = data.SelectedLane ?? Lane.Mid;
         }
 
         public void Save()
@@ -41,7 +41,7 @@
             Data data = new()
             {
                 ChampionText = _mainViewModel.ChampText,
-                LaneText = _mainViewModel.LaneText
+                SelectedLane = _mainViewModel.SelectedLane
             };
             _binaryReadWriter.Serialize(data, stream);
         }

@@ -17,6 +17,8 @@
 
         private readonly WriteableBitmap _screenshotRenderSurface;
 
+        private readonly LaneImageFetcher _laneImageFetcher = new();
+
         private readonly MainViewModel _mainViewModel;
 
         private readonly DiskDataStore _dataStore;
@@ -49,7 +51,7 @@
 
             _dataStore.Load();
 
-            MainWindow mainWindow = new()
+            MainWindow mainWindow = new(_laneImageFetcher)
             {
                 DataContext = _mainViewModel
             };

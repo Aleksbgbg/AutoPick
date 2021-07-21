@@ -21,10 +21,10 @@
                                  .Where(propertyInfo => propertyInfo.FieldIndexAttribute != null)
                                  .ToArray();
 
-            foreach (var v in array)
+            foreach (var value in array)
             {
-                ushort fieldIndex = v.FieldIndexAttribute!.FieldIndex;
-                PropertyInfo propertyInfo = v.Property;
+                ushort fieldIndex = value.FieldIndexAttribute!.FieldIndex;
+                PropertyInfo propertyInfo = value.Property;
 
                 if (_fieldIndexToPropertyInfo.ContainsKey(fieldIndex))
                 {
@@ -58,33 +58,53 @@
             {
                 object? memberValue = propertyInfo.GetValue(value);
 
-                serializer.SerializeIndex(fieldIndex);
-
-                switch (memberValue)
+                if (memberValue == null)
                 {
-                case bool b:
-                    serializer.Serialize(b);
-                    break;
-                case int i:
-                    serializer.Serialize(i);
-                    break;
-                case string s:
-                    serializer.Serialize(s);
-                    break;
+                    continue;
                 }
+
+                serializer.SerializeIndex(fieldIndex);
+                Serialize(serializer, propertyInfo, memberValue);
+            }
+        }
+
+        private static void Serialize(BinarySerializer serializer, PropertyInfo propertyInfo, object? value)
+        {
+            switch (value)
+            {
+            case bool b:
+                serializer.Serialize(b);
+                break;
+            case int i:
+                serializer.Serialize(i);
+                break;
+            case string s:
+                serializer.Serialize(s);
+                break;
+            case Enum:
+                Type enumType = Nullable.GetUnderlyingType(propertyInfo.PropertyType).GetEnumUnderlyingType();
+
+                if (enumType == typeof(int))
+                {
+                    serializer.Serialize((int)value);
+                }
+
+                break;
             }
         }
 
         public T Deserialize(Stream stream)
         {
-            T value = new();
+            T returnValue = new();
             BinaryDeserializer deserializer = new(stream);
+
+            HashSet<ushort> deserializedFields = new();
 
             while (stream.Position != stream.Length)
             {
                 ushort fieldIndex = deserializer.DeserializeFieldIndex();
 
-                if (!_fieldIndexToPropertyInfo.ContainsKey(fieldIndex))
+                if ((!_fieldIndexToPropertyInfo.ContainsKey(fieldIndex)) || (deserializedFields.Contains(fieldIndex)))
                 {
                     continue;
                 }
@@ -94,19 +114,63 @@
 
                 if (type == typeof(bool?))
                 {
-                    propertyInfo.SetValue(value, deserializer.DeserializeBool());
+                    bool? boolValue = deserializer.DeserializeBool();
+
+                    if (boolValue == null)
+                    {
+                        break;
+                    }
+
+                    propertyInfo.SetValue(returnValue, boolValue);
                 }
                 else if (type == typeof(int?))
                 {
-                    propertyInfo.SetValue(value, deserializer.DeserializeInt());
+                    int? intValue = deserializer.DeserializeInt();
+
+                    if (intValue == null)
+                    {
+                        break;
+                    }
+
+                    propertyInfo.SetValue(returnValue, intValue);
                 }
                 else if (type == typeof(string))
                 {
-                    propertyInfo.SetValue(value, deserializer.DeserializeString());
+                    string? stringValue = deserializer.DeserializeString();
+
+                    if (stringValue == null)
+                    {
+                        break;
+                    }
+
+                    propertyInfo.SetValue(returnValue, stringValue);
                 }
+                else
+                {
+                    Type? enumType = Nullable.GetUnderlyingType(type);
+
+                    if (enumType?.IsEnum ?? false)
+                    {
+                        Type underlyingType = enumType.GetEnumUnderlyingType();
+
+                        if (underlyingType == typeof(int))
+                        {
+                            int? intValue = deserializer.DeserializeInt();
+
+                            if (intValue == null)
+                            {
+                                break;
+                            }
+
+                            propertyInfo.SetValue(returnValue, Enum.ToObject(enumType, intValue));
+                        }
+                    }
+                }
+
+                deserializedFields.Add(fieldIndex);
             }
 
-            return value;
+            return returnValue;
         }
 
         private static bool IsNullable(PropertyInfo info)

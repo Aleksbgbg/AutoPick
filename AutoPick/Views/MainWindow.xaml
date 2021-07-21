@@ -12,8 +12,6 @@
     <StackPanel>
         <TextBlock Text="Champion"/>
         <TextBox Text="{Binding ChampText, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock Text="Lane"/>
-        <TextBox Text="{Binding LaneText, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBlock Text="{Binding DetectionInfo.State, StringFormat=State: {0}}"/>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -72,5 +70,19 @@
                 </TextBlock.Style>
             </TextBlock>
         </Grid>
+        <Image Source="{Binding SelectedLane, Converter={StaticResource LaneImageConverter}}" Width="30" Height="30"/>
+        <ComboBox SelectedItem="{Binding SelectedLane}" ItemsSource="{Binding Lanes}" HorizontalAlignment="Center">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="20"
+                               Height="20"
+                               Source="{Binding Converter={StaticResource LaneImageConverter}}"/>
+                        <TextBlock Margin="5 0 0 0"
+                                   Text="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
     </StackPanel>
 </Window>

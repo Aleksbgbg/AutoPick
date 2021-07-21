@@ -2,7 +2,7 @@
 {
     public interface IUserConfiguration
     {
-        public string LaneName { get; }
+        public Lane Lane { get; }
 
         public string ChampionName { get; }
     }

@@ -94,13 +94,13 @@ namespace AutoPick.DebugTools
             case 1:
                 return GetState();
             case 2:
-                _mainViewModel.LaneText = Encoding.Unicode.GetString(commandData);
+                _mainViewModel.SelectedLane = (Lane)commandData[0];
                 break;
             case 3:
                 _mainViewModel.ChampText = Encoding.Unicode.GetString(commandData);
                 break;
             case 4:
-                return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.LaneText));
+                return Task.FromResult(new[] { (byte)_mainViewModel.SelectedLane });
             case 5:
                 return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.ChampText));
             }

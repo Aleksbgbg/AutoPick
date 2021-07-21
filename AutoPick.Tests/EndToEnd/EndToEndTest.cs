@@ -91,7 +91,7 @@
             Assert.Equal(State.Connecting, await _autoPickAppController.GetState());
 
             // Pick champion
-            await _autoPickAppController.SetLane("jng");
+            await _autoPickAppController.SetLane(Lane.Jungle);
             await _autoPickAppController.SetChampion("Fiora");
 
             await _mockAppController.EnterPickScreen();
@@ -124,7 +124,7 @@
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
-            await _autoPickAppController.SetLane("mid");
+            await _autoPickAppController.SetLane(Lane.Mid);
             await _autoPickAppController.SetChampion("Irelia");
 
             await _mockAppController.EnterPickScreen();
@@ -164,7 +164,7 @@
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
-            await _autoPickAppController.SetLane("jng");
+            await _autoPickAppController.SetLane(Lane.Jungle);
             await _autoPickAppController.SetChampion("Fiora");
 
             // Disable
@@ -240,7 +240,7 @@
 
             // Pick screen
             await _mockAppController.EnterLobbyScreen();
-            await _autoPickAppController.SetLane("adc");
+            await _autoPickAppController.SetLane(Lane.Adc);
             await _autoPickAppController.SetChampion("Jayce");
 
             await _mockAppController.EnterPickScreen();
@@ -304,20 +304,20 @@
             await _autoPickAppController.Start();
 
             await _autoPickAppController.SetChampion("Ahri");
-            await _autoPickAppController.SetLane("top");
+            await _autoPickAppController.SetLane(Lane.Top);
             await _autoPickAppController.Shutdown();
 
             await _autoPickAppController.Start();
             Assert.Equal("Ahri", await _autoPickAppController.GetChampion());
-            Assert.Equal("top", await _autoPickAppController.GetLane());
+            Assert.Equal(Lane.Top, await _autoPickAppController.GetLane());
 
             await _autoPickAppController.SetChampion("Jax");
-            await _autoPickAppController.SetLane("jng");
+            await _autoPickAppController.SetLane(Lane.Jungle);
             await _autoPickAppController.Shutdown();
             await _autoPickAppController.Start();
 
             Assert.Equal("Jax", await _autoPickAppController.GetChampion());
-            Assert.Equal("jng", await _autoPickAppController.GetLane());
+            Assert.Equal(Lane.Jungle, await _autoPickAppController.GetLane());
         }
 
         // Flaky with lower delays
@@ -327,7 +327,7 @@
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
-            await _autoPickAppController.SetLane("adc");
+            await _autoPickAppController.SetLane(Lane.Adc);
             await _autoPickAppController.SetChampion("Jayce");
             _processManager.StartThreadWithTimeout(10_000, async () =>
             {

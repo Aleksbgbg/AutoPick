@@ -83,7 +83,7 @@
         private static ITemplate LoadTemplate(string name)
         {
             using Stream? stream = Assembly.GetExecutingAssembly()
-                                           .GetManifestResourceStream($"AutoPick.DetectionImages.{name}");
+                                           .GetManifestResourceStream($"AutoPick.Images.Detection.{name}");
 
             if (stream == null)
             {

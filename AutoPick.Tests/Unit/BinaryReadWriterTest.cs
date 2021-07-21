@@ -42,6 +42,23 @@
         }
 
         [Fact]
+        public void SerializesEnum()
+        {
+            BinaryReadWriter<EnumData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+
+            binaryReadWriter.Serialize(new EnumData { Value = Enum.B }, memoryStream);
+
+            Assert.Equal(new byte[]
+            {
+                // Field index
+                0, 0,
+                // Value
+                1, 0, 0, 0
+            }, memoryStream.ToArray());
+        }
+
+        [Fact]
         public void SerializesString()
         {
             BinaryReadWriter<StringData> binaryReadWriter = new();
@@ -117,6 +134,19 @@
         }
 
         [Fact]
+        public void DeserializesEnum()
+        {
+            BinaryReadWriter<EnumData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+            binaryReadWriter.Serialize(new EnumData { Value = Enum.C }, memoryStream);
+            memoryStream.Position = 0;
+
+            EnumData data = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Equal(Enum.C, data.Value);
+        }
+
+        [Fact]
         public void DeserializesString()
         {
             BinaryReadWriter<StringData> binaryReadWriter = new();
@@ -147,6 +177,32 @@
             Assert.Equal(5, data.Value0);
             Assert.Equal(10, data.Value1);
             Assert.Equal(15, data.Value2);
+        }
+
+        [Fact]
+        public void HandlesMultipleSerializations()
+        {
+            BinaryReadWriter<MixedData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+
+            binaryReadWriter.Serialize(new MixedData
+            {
+                Bool = true,
+                Int = 250,
+                String = "Hello",
+                Enum = Enum.C
+            }, memoryStream);
+            memoryStream.Position = 0;
+            MixedData data1 = binaryReadWriter.Deserialize(memoryStream);
+            memoryStream.Position = 0;
+            binaryReadWriter.Serialize(data1, memoryStream);
+            memoryStream.Position = 0;
+            MixedData data2 = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Equal(true, data2.Bool);
+            Assert.Equal(250, data2.Int);
+            Assert.Equal("Hello", data2.String);
+            Assert.Equal(Enum.C, data2.Enum);
         }
 
         [Fact]
@@ -182,16 +238,93 @@
             Assert.Equal("hello", data.String);
         }
 
+        [Theory]
+        [InlineData(new byte[] // Bool
+        {
+            // Field index
+            0, 0,
+            // Invalid bool (not 0 or 1)
+            2
+        })]
+        [InlineData(new byte[] // Int
+        {
+            // Field index
+            1, 0,
+            // Invalid int (too short)
+            0, 0, 1
+        })]
+        [InlineData(new byte[] // String
+        {
+            // Field index
+            2, 0,
+            // Invalid string (length bigger than actual readable bytes)
+            255, 255, 231, 0, 149, 10, 5, 218, 8, 51, 7, 176, 205, 65, 93, 34, 252, 244, 99, 150
+        })]
+        [InlineData(new byte[] // String
+        {
+            // Field index
+            2, 0,
+            // Invalid string (length negative)
+            0, 0, 0, 255, 149, 10, 5, 218, 8, 51, 7, 176, 205, 65, 93, 34, 252, 244, 99, 150
+        })]
+        public void HandlesIntentionallyInvalidData(byte[] bytes)
+        {
+            BinaryReadWriter<MixedData> binaryReadWriter = new();
+            MemoryStream memoryStream = new(bytes);
+
+            MixedData data = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Null(data.Bool);
+            Assert.Null(data.Int);
+            Assert.Null(data.String);
+            Assert.Null(data.Enum);
+        }
+
         [Fact]
-        public void HandlesRandomData()
+        public void IgnoresMultipleValues()
         {
             BinaryReadWriter<MixedData> binaryReadWriter = new();
             MemoryStream memoryStream = new(new byte[]
             {
-                0, 0, 231, 242, 149, 10, 5, 218, 8, 51, 7, 176, 205, 65, 93, 34, 252, 244, 99, 150
+                // Field index 0
+                0, 0,
+                // True
+                1,
+                // Field index 0
+                0, 0,
+                // False
+                0,
+                // Field index 0
+                0, 0,
+                // False
+                0
             });
 
-            binaryReadWriter.Deserialize(memoryStream);
+            MixedData data = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Equal(true, data.Bool);
+        }
+
+        [Fact]
+        public void HandlesNullValues()
+        {
+            BinaryReadWriter<MixedData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+            binaryReadWriter.Serialize(new MixedData
+            {
+                Bool = null,
+                Int = null,
+                String = null,
+                Enum = null
+            }, memoryStream);
+            memoryStream.Position = 0;
+
+            MixedData data = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Null(data.Bool);
+            Assert.Null(data.Int);
+            Assert.Null(data.String);
+            Assert.Null(data.Enum);
         }
 
         [Fact]
@@ -230,6 +363,19 @@
             public int? Value { get; set; }
         }
 
+        private enum Enum
+        {
+            A,
+            B,
+            C
+        }
+
+        private class EnumData
+        {
+            [FieldIndex(0)]
+            public Enum? Value { get; set; }
+        }
+
         private class StringData
         {
             [FieldIndex(ushort.MaxValue)]
@@ -258,6 +404,9 @@
 
             [FieldIndex(2)]
             public string? String { get; set; }
+
+            [FieldIndex(3)]
+            public Enum? Enum { get; set; }
         }
 
         private class PartiallyUnannotatedData

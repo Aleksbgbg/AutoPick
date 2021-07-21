@@ -13,10 +13,10 @@
 
         protected override async Task ExecuteAction(ILeagueClientExecutor clientExecutor)
         {
-            await clientExecutor.CallLane(_userConfiguration.LaneName);
-            await clientExecutor.CallLane(_userConfiguration.LaneName);
+            await clientExecutor.CallLane(_userConfiguration.Lane);
+            await clientExecutor.CallLane(_userConfiguration.Lane);
             await clientExecutor.PickChampion(_userConfiguration.ChampionName);
-            await clientExecutor.CallLane(_userConfiguration.LaneName);
+            await clientExecutor.CallLane(_userConfiguration.Lane);
         }
     }
 }

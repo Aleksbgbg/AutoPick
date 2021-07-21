@@ -155,14 +155,14 @@
             return Task.CompletedTask;
         }
 
-        public async Task CallLane(string lane)
+        public async Task CallLane(Lane lane)
         {
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.ChatBox);
             await FlushAndDelay(inputQueue, ShortDelayMs);
 
-            inputQueue.TypeText(lane);
+            inputQueue.TypeText(lane.ToCallout());
             inputQueue.PressEnter();
             await FlushAndDelay(inputQueue, ShortDelayMs);
         }

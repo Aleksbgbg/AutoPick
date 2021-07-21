@@ -1,5 +1,6 @@
 ﻿namespace AutoPick.ViewModels
 {
+    using System;
     using System.Drawing;
     using System.Windows.Media.Imaging;
     using AutoPick.StateDetection.Definition;
@@ -28,23 +29,6 @@
             }
         }
 
-        private string _laneText = string.Empty;
-        public string LaneText
-        {
-            get => _laneText;
-
-            set
-            {
-                if (_laneText == value)
-                {
-                    return;
-                }
-
-                _laneText = value;
-                NotifyPropertyChanged();
-            }
-        }
-
         private DetectionInfo _detectionInfo = new(State.NotLaunched, Size.Empty);
         public DetectionInfo DetectionInfo
         {
@@ -64,7 +48,26 @@
 
         public BitmapSource ScreenshotPreviewSource { get; }
 
-        string IUserConfiguration.LaneName => LaneText;
+        public Lane[] Lanes => Enum.GetValues<Lane>();
+
+        private Lane _selectedLane;
+        public Lane SelectedLane
+        {
+            get => _selectedLane;
+
+            set
+            {
+                if (_selectedLane == value)
+                {
+                    return;
+                }
+
+                _selectedLane = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        Lane IUserConfiguration.Lane => SelectedLane;
 
         string IUserConfiguration.ChampionName => ChampText;
 

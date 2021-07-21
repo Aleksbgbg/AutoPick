@@ -36,9 +36,9 @@
             return (State)(await _appCommunicator.Send(1))[0];
         }
 
-        public Task SetLane(string value)
+        public Task SetLane(Lane lane)
         {
-            return _appCommunicator.Send(2, Encoding.Unicode.GetBytes(value));
+            return _appCommunicator.Send(2, new[] { (byte)lane });
         }
 
         public Task SetChampion(string value)
@@ -46,9 +46,9 @@
             return _appCommunicator.Send(3, Encoding.Unicode.GetBytes(value));
         }
 
-        public async Task<string> GetLane()
+        public async Task<Lane> GetLane()
         {
-            return Encoding.Unicode.GetString(await _appCommunicator.Send(4));
+            return (Lane)(await _appCommunicator.Send(4))[0];
         }
 
         public async Task<string> GetChampion()

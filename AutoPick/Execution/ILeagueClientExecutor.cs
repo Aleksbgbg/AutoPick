@@ -6,7 +6,7 @@
     {
         Task AcceptMatch();
 
-        Task CallLane(string lane);
+        Task CallLane(Lane lane);
 
         Task PickChampion(string championName);
 
