@@ -4,22 +4,21 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using AutoPick.StateDetection.Definition;
-    using AutoPick.WinApi;
     using AutoPick.WinApi.Native;
     using Xunit;
 
-    public class EndToEndTest : IDisposable
+    public class EndToEndFunctionalityTest : IDisposable
     {
         private readonly TestProcessAndThreadManager _processManager;
 
         private readonly AutoPickAppController _autoPickAppController;
         private readonly MockAppController _mockAppController;
 
-        public EndToEndTest()
+        public EndToEndFunctionalityTest()
         {
-            _processManager = new();
-            _autoPickAppController = new(_processManager);
-            _mockAppController = new(_processManager);
+            _processManager = new TestProcessAndThreadManager();
+            _autoPickAppController = new AutoPickAppController(_processManager);
+            _mockAppController = new MockAppController(_processManager);
         }
 
         public void Dispose()
@@ -148,17 +147,6 @@
             Assert.True(await _mockAppController.HasLockedIn());
         }
 
-        [Fact(Timeout = 5_000)]
-        public async Task StartTwoInstances_OneAutoCloses()
-        {
-            Process process1 = _processManager.Start("AutoPick.exe");
-            Process process2 = _processManager.Start("AutoPick.exe");
-            await Task.WhenAny(process1.WaitForExitAsync(),
-                               process2.WaitForExitAsync());
-
-            Assert.Single(Process.GetProcessesByName("AutoPick"));
-        }
-
         [Fact]
         public async Task ToggleDisableGlobalHotkey_StateIsDisabled()
         {
@@ -189,7 +177,7 @@
         }
 
         [Fact]
-        public async Task WindowChanged()
+        public async Task WindowChangedBetweenLoops_StillDetected()
         {
             await _mockAppController.Start();
             await _autoPickAppController.Start();
@@ -320,37 +308,15 @@
             Assert.Equal(Lane.Jungle, await _autoPickAppController.GetLane());
         }
 
-        // Flaky with lower delays
-        // System is not 100% stable when fast user input events are applied, however it is sufficiently resilient
-        [Fact]
-        public async Task ConstantMouseMovement_DoesNotImpairActions()
+        [Fact(Timeout = 5_000)]
+        public async Task StartTwoInstances_OneAutoCloses()
         {
-            await _mockAppController.Start();
-            await _autoPickAppController.Start();
-            await _autoPickAppController.SetLane(Lane.Adc);
-            await _autoPickAppController.SetChampion("Jayce");
-            _processManager.StartThreadWithTimeout(10_000, async () =>
-            {
-                InputQueue inputQueue = new(IntPtr.Zero);
+            Process process1 = _processManager.Start("AutoPick.exe");
+            Process process2 = _processManager.Start("AutoPick.exe");
+            await Task.WhenAny(process1.WaitForExitAsync(),
+                               process2.WaitForExitAsync());
 
-                while (true)
-                {
-                    inputQueue.MoveMouse(new Win32Point(5, 5));
-                    inputQueue.Flush();
-                    await Task.Delay(20);
-                    inputQueue.MoveMouse(new Win32Point(500, 5));
-                    inputQueue.Flush();
-                    await Task.Delay(20);
-                }
-            });
-
-            await _mockAppController.EnterPickScreen();
-
-            Assert.Equal(State.Pick, await _autoPickAppController.GetState());
-            Assert.Equal("adc", await _mockAppController.GetLastChatLine());
-            Assert.Equal("Jayce", await _mockAppController.GetSearchBoxText());
-            Assert.True(await _mockAppController.HasSelectedChampion());
-            Assert.True(await _mockAppController.HasLockedIn());
+            Assert.Single(Process.GetProcessesByName("AutoPick"));
         }
     }
 }

@@ -13,7 +13,15 @@
 
         public async Task Connect(string address, int port)
         {
-            await _tcpClient.ConnectAsync(address, port);
+            try
+            {
+                await _tcpClient.ConnectAsync(address, port);
+            }
+            catch (SocketException e)
+            {
+                throw new InvalidOperationException("Target app cannot be connected to - it likely crashed", e);
+            }
+
             _stream = _tcpClient.GetStream();
             _stream.ReadTimeout = 10_000;
         }

@@ -33,12 +33,12 @@
             return process;
         }
 
-        public void StartThreadWithTimeout(int timeoutMs, Action action)
+        public void StartThreadWithTimeout(int timeoutMs, Action<CancellationToken> action)
         {
             CancellationTokenSource cancellationTokenSource = new();
             _cancellationTokenSources.Add(cancellationTokenSource);
             cancellationTokenSource.CancelAfter(timeoutMs);
-            Task.Factory.StartNew(action,
+            Task.Factory.StartNew(() => action(cancellationTokenSource.Token),
                                   cancellationTokenSource.Token,
                                   TaskCreationOptions.LongRunning,
                                   TaskScheduler.Current);

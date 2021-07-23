@@ -78,11 +78,12 @@
                 {
                     State state = _enabled ? DetectState() : State.Disabled;
 
-                    Task action = RunTakeActionThread(state);
-                    RunUiUpdateThread(new DetectionInfo(state, _lastWindowSize));
-                    await action;
+                    Task actionThread = RunTakeActionThread(state);
+                    Task uiUpdateThread = RunUiUpdateThread(new DetectionInfo(state, _lastWindowSize));
+                    await actionThread;
 
                 #if DEBUG
+                    await uiUpdateThread;
                     FinishedExecution?.Invoke(this, EventArgs.Empty);
                 #endif
 
@@ -100,9 +101,9 @@
             return Task.Run(() => _actionExecutor.ExecuteAction(state, _windowManipulator!));
         }
 
-        private void RunUiUpdateThread(DetectionInfo detectionInfo)
+        private Task RunUiUpdateThread(DetectionInfo detectionInfo)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 _detectionInfoConsumer.Consume(detectionInfo);
 

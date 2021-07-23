@@ -15,20 +15,15 @@
     {
         private readonly SingleInstance _singleInstance = new();
 
-        private readonly WriteableBitmap _screenshotRenderSurface;
+        private WriteableBitmap _screenshotRenderSurface;
 
-        private readonly LaneImageFetcher _laneImageFetcher = new();
+        private ChampionStore _championStore;
 
-        private readonly MainViewModel _mainViewModel;
+        private LaneImageFetcher _laneImageFetcher;
 
-        private readonly DiskDataStore _dataStore;
+        private MainViewModel _mainViewModel;
 
-        public App()
-        {
-            _screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
-            _mainViewModel = new MainViewModel(_screenshotRenderSurface);
-            _dataStore = new DiskDataStore(_mainViewModel);
-        }
+        private DiskDataStore _dataStore;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -37,7 +32,7 @@
             base.OnStartup(e);
         }
 
-        private void AppStartup(object sender, StartupEventArgs e)
+        private async void AppStartup(object sender, StartupEventArgs e)
         {
             _singleInstance.TryConsume();
 
@@ -49,9 +44,17 @@
                 return;
             }
 
+            await ChampionStore.LoadChampionsIfNecessary();
+
+            _screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
+            _championStore = new ChampionStore();
+            _laneImageFetcher = new LaneImageFetcher();
+            _mainViewModel = new MainViewModel(_screenshotRenderSurface, _championStore.Champions);
+            _dataStore = new DiskDataStore(_mainViewModel, _championStore);
+
             _dataStore.Load();
 
-            MainWindow mainWindow = new(_laneImageFetcher)
+            MainWindow mainWindow = new(_championStore, _laneImageFetcher)
             {
                 DataContext = _mainViewModel
             };
@@ -73,7 +76,8 @@
 
         #if DEBUG
             ErrorReporting.Init();
-            new RemoteAppController(this, mainWindow, _mainViewModel, new DetectionUpdateWaiter(autoPicker))
+            new RemoteAppController(
+                    this, mainWindow, _mainViewModel, new DetectionUpdateWaiter(autoPicker), _championStore)
                 .BeginRemoteControl();
         #endif
         }

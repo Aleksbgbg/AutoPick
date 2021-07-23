@@ -7,26 +7,11 @@
 
     public class MainViewModel : ViewModelBase, IUserConfiguration, IDetectionInfoConsumer
     {
-        public MainViewModel(BitmapSource screenshotPreviewSource)
+        public MainViewModel(BitmapSource screenshotPreviewSource, Champion[] champions)
         {
             ScreenshotPreviewSource = screenshotPreviewSource;
-        }
-
-        private string _champText = string.Empty;
-        public string ChampText
-        {
-            get => _champText;
-
-            set
-            {
-                if (_champText == value)
-                {
-                    return;
-                }
-
-                _champText = value;
-                NotifyPropertyChanged();
-            }
+            Champions = champions;
+            _selectedChampion = champions[0];
         }
 
         private DetectionInfo _detectionInfo = new(State.NotLaunched, Size.Empty);
@@ -47,6 +32,30 @@
         }
 
         public BitmapSource ScreenshotPreviewSource { get; }
+
+        public Champion[] Champions { get; }
+
+        private Champion _selectedChampion;
+        public Champion SelectedChampion
+        {
+            get => _selectedChampion;
+
+            set
+            {
+                if (value == null!)
+                {
+                    return;
+                }
+
+                if (_selectedChampion == value)
+                {
+                    return;
+                }
+
+                _selectedChampion = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         public Lane[] Lanes => Enum.GetValues<Lane>();
 
@@ -69,7 +78,7 @@
 
         Lane IUserConfiguration.Lane => SelectedLane;
 
-        string IUserConfiguration.ChampionName => ChampText;
+        string IUserConfiguration.ChampionName => SelectedChampion.Name;
 
         public void Consume(DetectionInfo detectionInfo)
         {

@@ -71,7 +71,7 @@
             matchRegion.Save(outputPath);
         }
 
-        [Theory]
+        [Theory(Skip = SkipReason)]
         [InlineData(@"A:\Programming\AutoPick\AutoPick.Tests\TestImages\1280x720\BasicScreens\[9]SelectedHover.png",
                     @"A:\Programming\AutoPick\AutoPick\DetectionImages\SelectedHover.png",
                     555, 588, 172, 42)]

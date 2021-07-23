@@ -7,7 +7,7 @@
 
     public class LaneImageFetcher
     {
-        private readonly Dictionary<Lane, BitmapImage> _images =
+        private readonly Dictionary<Lane, BitmapImage> _laneImages =
             Enum.GetValues<Lane>()
                 .ToDictionary(
                     lane => lane,
@@ -15,7 +15,7 @@
 
         public BitmapImage ImageForLane(Lane lane)
         {
-            return _images[lane];
+            return _laneImages[lane];
         }
     }
 }

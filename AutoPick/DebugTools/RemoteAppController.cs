@@ -21,13 +21,16 @@ namespace AutoPick.DebugTools
 
         private readonly DetectionUpdateWaiter _detectionUpdateWaiter;
 
+        private readonly ChampionStore _championStore;
+
         public RemoteAppController(Application application, MainWindow mainWindow, MainViewModel mainViewModel,
-                                   DetectionUpdateWaiter detectionUpdateWaiter)
+                                   DetectionUpdateWaiter detectionUpdateWaiter, ChampionStore championStore)
         {
             _application = application;
             _mainWindow = mainWindow;
             _mainViewModel = mainViewModel;
             _detectionUpdateWaiter = detectionUpdateWaiter;
+            _championStore = championStore;
         }
 
         public void BeginRemoteControl()
@@ -97,12 +100,12 @@ namespace AutoPick.DebugTools
                 _mainViewModel.SelectedLane = (Lane)commandData[0];
                 break;
             case 3:
-                _mainViewModel.ChampText = Encoding.Unicode.GetString(commandData);
+                _mainViewModel.SelectedChampion = _championStore.ChampionByName(Encoding.Unicode.GetString(commandData));
                 break;
             case 4:
                 return Task.FromResult(new[] { (byte)_mainViewModel.SelectedLane });
             case 5:
-                return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.ChampText));
+                return Task.FromResult(Encoding.Unicode.GetBytes(_mainViewModel.SelectedChampion.Name));
             }
 
             return Task.FromResult(Array.Empty<byte>());
