@@ -5,6 +5,7 @@
         <UseWPF>true</UseWPF>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <OutDir>..\AutoPick.Tests\bin\$(Configuration)\$(TargetFramework)</OutDir>
