@@ -4,7 +4,7 @@
     {
         public static bool IsWindowAvailable(this State state)
         {
-            return state is not (State.NotLaunched or State.Minimised or State.InvalidWindowSize);
+            return state is not (State.NotLaunched or State.Minimised or State.InvalidWindowSize or State.Disabled);
         }
     }
 }

@@ -300,17 +300,25 @@
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <Image Grid.ColumnSpan="2" Grid.RowSpan="2"
+            <Image Grid.ColumnSpan="3" Grid.RowSpan="3"
                    Source="{Binding ScreenshotPreviewSource}"
                    MaxWidth="640" MaxHeight="360"/>
-            <TextBlock Grid.ColumnSpan="2" Grid.RowSpan="2"
+            <Border Grid.Column="0" Grid.Row="0" Background="White" Opacity="0.8" Margin="5" Padding="2,3">
+                <DockPanel>
+                    <Image VerticalAlignment="Center" Source="{Binding DetectionInfo.State, Converter={StaticResource InfoIconConverter}}" Width="20" Height="20"/>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding DetectionInfo.State, Converter={StaticResource InfoTextConverter}}" Margin="2,0"/>
+                </DockPanel>
+            </Border>
+            <TextBlock Grid.ColumnSpan="3" Grid.RowSpan="3"
                        TextAlignment="Center" VerticalAlignment="Center"
                        FontSize="48" Foreground="White"
                        Text="Window Unavailable">
@@ -325,7 +333,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <TextBlock Grid.Row="1" Foreground="White" TextAlignment="Right"
+            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="White" TextAlignment="Right"
                        Text="{Binding DetectionInfo.WindowSize.Width}">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
@@ -338,7 +346,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <TextBlock Grid.Column="1" Foreground="White"
+            <TextBlock Grid.Row="1" Grid.Column="2" Foreground="White"
                        Text="{Binding DetectionInfo.WindowSize.Height}">
                 <TextBlock.LayoutTransform>
                     <RotateTransform Angle="-90"/>
@@ -395,6 +403,5 @@
                 </ComboBox>
             </StackPanel>
         </StackPanel>
-        <TextBlock Text="{Binding DetectionInfo.State, StringFormat=State: {0}}"/>
     </StackPanel>
 </Window>

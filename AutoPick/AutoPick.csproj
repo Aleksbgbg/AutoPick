@@ -26,6 +26,7 @@
     <ItemGroup>
         <EmbeddedResource Include="Images\Champions\**" />
         <EmbeddedResource Include="Images\Detection\**" />
+        <Resource Include="Images\Icons\**" />
         <Resource Include="Images\Lanes\**" />
     </ItemGroup>
 </Project>
