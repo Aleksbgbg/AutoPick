@@ -84,6 +84,12 @@
 
             if (checksum != loaderReportedChecksum)
             {
+                if (Directory.Exists("Champions"))
+                {
+                    Directory.Delete("Champions", recursive: true);
+                    Directory.CreateDirectory("Champions");
+                }
+
                 await RegenerateImages(championLoader);
             }
         }

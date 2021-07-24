@@ -100,6 +100,21 @@
             Assert.True(await _mockAppController.HasLockedIn());
         }
 
+        [Fact]
+        public async Task AddExtraChampion_NotSelectable()
+        {
+            if (!Directory.Exists("Champions"))
+            {
+                await _autoPickAppController.Start();
+                await _autoPickAppController.Shutdown();
+            }
+
+            File.Copy("Champions/Akshan.png", "Champions/John.png", overwrite: true);
+
+            await _autoPickAppController.Start();
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _autoPickAppController.SetChampion("John"));
+        }
+
         // Requires manual condition setup, so this test is disabled by default
         // Turn off internet connection or shut down server manually
         [Fact(Skip = "Requires manual setup - read test comments.")]

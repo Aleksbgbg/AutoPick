@@ -44,6 +44,10 @@
                 return;
             }
 
+        #if DEBUG
+            ErrorReporting.Init();
+        #endif
+
             await ChampionStore.LoadChampionsIfNecessary();
 
             _screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
@@ -75,7 +79,6 @@
             reactivate.Activated += (_, _) => autoPicker.Enable();
 
         #if DEBUG
-            ErrorReporting.Init();
             new RemoteAppController(
                     this, mainWindow, _mainViewModel, new DetectionUpdateWaiter(autoPicker), _championStore)
                 .BeginRemoteControl();

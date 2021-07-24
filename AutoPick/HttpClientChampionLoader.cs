@@ -20,17 +20,33 @@
         public async Task<byte[]> GetChecksum()
         {
             HttpResponseMessage response = await Get("champions/checksum");
-            return await response.Content.ReadAsByteArrayAsync();
+            byte[] checksum = await response.Content.ReadAsByteArrayAsync();
+
+            if (checksum.Length != 32)
+            {
+                throw InvalidServerResponse();
+            }
+
+            return checksum;
         }
 
         public async Task<string[]> GetChampionNames()
         {
             HttpResponseMessage championsResponse = await Get("champions");
 
-            string[]? championNames =
-                await JsonSerializer.DeserializeAsync<string[]>(await championsResponse.Content.ReadAsStreamAsync());
+            string[]? championNames;
 
-            if (championNames == null)
+            try
+            {
+                championNames = await JsonSerializer.DeserializeAsync<string[]>(
+                        await championsResponse.Content.ReadAsStreamAsync());
+            }
+            catch (JsonException)
+            {
+                throw InvalidServerResponse();
+            }
+
+            if ((championNames == null) || (championNames.Length < 156))
             {
                 throw InvalidServerResponse();
             }
