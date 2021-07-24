@@ -12,9 +12,11 @@
 
     public class WindowManipulator : IDisposable, ILeagueClientManipulator
     {
-        private const int ShortDelayMs = 100;
-        private const int LongDelayMs = 200;
-        private const int ExtraLongDelayMs = 1_000;
+        private const int MinimumDelay = 20;
+        private const int DelayBeforeCompletion = MinimumDelay;
+        private const int DelayBeforeTyping = 50;
+        private const int DelayBeforeSelecting = 300;
+        private const int DelayBeforeLocking = 200;
 
         private readonly ClickPoints _clickPoints;
 
@@ -146,13 +148,11 @@
             }
         }
 
-        public Task AcceptMatch()
+        public async Task AcceptMatch()
         {
             InputQueue inputQueue = new(_window);
             inputQueue.ClickMouse(_clickPoints.AcceptButton);
-            inputQueue.Flush();
-
-            return Task.CompletedTask;
+            await FlushAndDelay(inputQueue, DelayBeforeCompletion);
         }
 
         public async Task CallLane(Lane lane)
@@ -160,11 +160,11 @@
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.ChatBox);
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeTyping);
 
             inputQueue.TypeText(lane.ToCallout());
             inputQueue.PressEnter();
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeCompletion);
         }
 
         public async Task PickChampion(string championName)
@@ -172,23 +172,23 @@
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.SearchBox);
-            await FlushAndDelay(inputQueue, LongDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeTyping);
 
             inputQueue.TypeText(championName);
-            await FlushAndDelay(inputQueue, ExtraLongDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeSelecting);
 
             inputQueue.ClickMouse(_clickPoints.FirstChampionSelectionImage);
-            await FlushAndDelay(inputQueue, LongDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeLocking);
 
             inputQueue.ClickMouse(_clickPoints.LockInButton);
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeCompletion);
         }
 
         public async Task LockIn()
         {
             InputQueue inputQueue = new(_window);
             inputQueue.ClickMouse(_clickPoints.LockInButton);
-            await FlushAndDelay(inputQueue, ShortDelayMs);
+            await FlushAndDelay(inputQueue, DelayBeforeCompletion);
         }
 
         private static Task FlushAndDelay(InputQueue inputQueue, int delayMs)
