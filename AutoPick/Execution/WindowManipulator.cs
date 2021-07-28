@@ -14,8 +14,9 @@
     {
         private const int MinimumDelay = 20;
         private const int DelayBeforeCompletion = MinimumDelay;
-        private const int DelayBeforeTyping = 50;
-        private const int DelayBeforeSelecting = 300;
+        private const int DelayBeforeTypingInSearchBox = 200;
+        private const int DelayBeforeTypingInChat = 50;
+        private const int DelayBeforeSelecting = 1_000;
         private const int DelayBeforeLocking = 200;
 
         private readonly ClickPoints _clickPoints;
@@ -160,7 +161,7 @@
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.ChatBox);
-            await FlushAndDelay(inputQueue, DelayBeforeTyping);
+            await FlushAndDelay(inputQueue, DelayBeforeTypingInChat);
 
             inputQueue.TypeText(lane.ToCallout());
             inputQueue.PressEnter();
@@ -172,7 +173,7 @@
             InputQueue inputQueue = new(_window);
 
             inputQueue.ClickMouse(_clickPoints.SearchBox);
-            await FlushAndDelay(inputQueue, DelayBeforeTyping);
+            await FlushAndDelay(inputQueue, DelayBeforeTypingInSearchBox);
 
             inputQueue.TypeText(championName);
             await FlushAndDelay(inputQueue, DelayBeforeSelecting);
