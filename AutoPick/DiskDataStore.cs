@@ -13,6 +13,9 @@
 
             [FieldIndex(2)]
             public Lane? SelectedLane { get; set; }
+
+            [FieldIndex(3)]
+            public ViewLayout? ViewLayout { get; set; }
         }
 
         private const string Filename = "AutoPickData.bin";
@@ -44,8 +47,14 @@
                 data.SelectedChampionName = "Katarina";
             }
 
+            if ((data.ViewLayout < ViewLayout.Tiny) || (data.ViewLayout > ViewLayout.Comfortable))
+            {
+                data.ViewLayout = ViewLayout.Tiny;
+            }
+
             _mainViewModel.SelectedChampion = _championStore.ChampionByName(data.SelectedChampionName);
             _mainViewModel.SelectedLane = data.SelectedLane ?? Lane.Mid;
+            _mainViewModel.ViewLayout = data.ViewLayout ?? ViewLayout.Tiny;
         }
 
         public void Save()
@@ -54,7 +63,8 @@
             Data data = new()
             {
                 SelectedChampionName = _mainViewModel.SelectedChampion.Name,
-                SelectedLane = _mainViewModel.SelectedLane
+                SelectedLane = _mainViewModel.SelectedLane,
+                ViewLayout = _mainViewModel.ViewLayout
             };
             _binaryReadWriter.Serialize(data, stream);
         }

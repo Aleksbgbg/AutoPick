@@ -1,0 +1,11 @@
+﻿<UserControl x:Class="AutoPick.Views.StateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+    <DockPanel>
+        <Image VerticalAlignment="Center" Source="{Binding DetectionInfo.State, Converter={StaticResource InfoIconConverter}}" Width="20" Height="20"/>
+        <TextBlock VerticalAlignment="Center" Text="{Binding DetectionInfo.State, Converter={StaticResource InfoTextConverter}}" Margin="2,0"/>
+    </DockPanel>
+</UserControl>

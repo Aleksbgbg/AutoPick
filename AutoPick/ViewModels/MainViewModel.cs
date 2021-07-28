@@ -14,6 +14,25 @@
             _selectedChampion = champions[0];
         }
 
+        public ViewLayout[] ViewLayouts { get; } = Enum.GetValues<ViewLayout>();
+
+        private ViewLayout _viewLayout = ViewLayout.Tiny;
+        public ViewLayout ViewLayout
+        {
+            get => _viewLayout;
+
+            set
+            {
+                if (_viewLayout == value)
+                {
+                    return;
+                }
+
+                _viewLayout = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private DetectionInfo _detectionInfo = new(State.NotLaunched, Size.Empty);
         public DetectionInfo DetectionInfo
         {

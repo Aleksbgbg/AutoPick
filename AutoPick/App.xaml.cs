@@ -1,11 +1,16 @@
 ﻿namespace AutoPick
 {
     using System;
+    using System.Linq;
+    using System.Reflection;
     using System.Windows;
     using System.Windows.Media.Imaging;
+    using AutoPick.Converters;
     using AutoPick.DebugTools;
     using AutoPick.Execution;
+    using AutoPick.StateDetection.Definition;
     using AutoPick.StateDetection.Imaging;
+    using AutoPick.Util;
     using AutoPick.ViewModels;
     using AutoPick.Views;
     using AutoPick.WinApi;
@@ -15,15 +20,7 @@
     {
         private readonly SingleInstance _singleInstance = new();
 
-        private WriteableBitmap _screenshotRenderSurface;
-
-        private ChampionStore _championStore;
-
-        private LaneImageFetcher _laneImageFetcher;
-
-        private MainViewModel _mainViewModel;
-
-        private DiskDataStore _dataStore;
+        private DiskDataStore? _dataStore;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -50,22 +47,42 @@
 
             await ChampionStore.LoadChampionsIfNecessary();
 
-            _screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
-            _championStore = new ChampionStore();
-            _laneImageFetcher = new LaneImageFetcher();
-            _mainViewModel = new MainViewModel(_screenshotRenderSurface, _championStore.Champions);
-            _dataStore = new DiskDataStore(_mainViewModel, _championStore);
+            WriteableBitmap screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
+            ChampionStore championStore = new();
+            LaneImageFetcher laneImageFetcher = new();
+            MainViewModel mainViewModel = new(screenshotRenderSurface, championStore.Champions);
+            _dataStore = new DiskDataStore(mainViewModel, championStore);
 
             _dataStore.Load();
 
-            MainWindow mainWindow = new(_championStore, _laneImageFetcher)
+            StateInfoDisplay[] infoDisplays = Enum.GetValues<State>().Zip(typeof(State).GetMembers(BindingFlags.Static | BindingFlags.Public))
+                                                  .Select(zippedValue => new StateInfoDisplay(
+                                                              zippedValue.First,
+                                                              zippedValue.Second.GetCustomAttribute<InfoDisplayAttribute>()))
+                                                  .ToArray();
+
+            ChampionImageConverter championImageConverter = new(championStore);
+            LaneImageConverter laneImageConverter = new(laneImageFetcher);
+            InfoTextConverter infoTextConverter = new(infoDisplays);
+            InfoIconConverter infoIconConverter = new(infoDisplays);
+
+            View.Register(() => new CalloutsView(championImageConverter, laneImageConverter)
             {
-                DataContext = _mainViewModel
+                DataContext = mainViewModel
+            });
+            View.Register(() => new StateView(infoTextConverter, infoIconConverter)
+            {
+                DataContext = mainViewModel
+            });
+
+            MainWindow mainWindow = new()
+            {
+                DataContext = mainViewModel
             };
             mainWindow.Show();
 
-            ScreenshotPreviewRenderer screenshotPreviewRenderer = new(_screenshotRenderSurface);
-            AutoPicker autoPicker = AutoPicker.Run(_mainViewModel, _mainViewModel, screenshotPreviewRenderer);
+            ScreenshotPreviewRenderer screenshotPreviewRenderer = new(screenshotRenderSurface);
+            AutoPicker autoPicker = AutoPicker.Run(mainViewModel, mainViewModel, screenshotPreviewRenderer);
 
             HotKey.Factory hotKeyFactory = HotKey.Factory.For(mainWindow);
 
@@ -80,14 +97,14 @@
 
         #if DEBUG
             new RemoteAppController(
-                    this, mainWindow, _mainViewModel, new DetectionUpdateWaiter(autoPicker), _championStore)
+                    this, mainWindow, mainViewModel, new DetectionUpdateWaiter(autoPicker), championStore)
                 .BeginRemoteControl();
         #endif
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            _dataStore.Save();
+            _dataStore?.Save();
             _singleInstance.Release();
         }
     }
