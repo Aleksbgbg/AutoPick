@@ -50,6 +50,7 @@
         public static unsafe ITemplate TemplateFromStream(Stream stream)
         {
             Bitmap bitmap = (Bitmap)Image.FromStream(stream);
+
             return Utils.UsingBitmapData(bitmap, bitmapData =>
             {
                 Mat dataMat = new(bitmap.Size, DepthType.Cv8U, 1);

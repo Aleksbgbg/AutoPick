@@ -4,6 +4,7 @@
     using System.Drawing;
     using System.Threading.Tasks;
     using AutoPick.DebugTools;
+    using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
     using AutoPick.StateDetection.Imaging;
     using AutoPick.Util;
@@ -12,7 +13,9 @@
     {
         public static readonly Size DefaultWindowSize = new(1280, 720);
 
-        private readonly Config _config;
+        private readonly StateConfig _stateConfig;
+
+        private readonly StateDetector _stateDetector;
 
         private readonly PerStateActionExecutor _actionExecutor;
 
@@ -29,18 +32,22 @@
         private bool _enabled = true;
 
         private AutoPicker(
-            Config config,
+            StateConfig stateConfig,
+            StateDetector stateDetector,
             PerStateActionExecutor actionExecutor,
             IDetectionInfoConsumer detectionInfoConsumer,
             ScreenshotPreviewRenderer screenshotPreviewRenderer)
         {
-            _config = config;
+            _stateConfig = stateConfig;
+            _stateDetector = stateDetector;
             _actionExecutor = actionExecutor;
             _detectionInfoConsumer = detectionInfoConsumer;
             _screenshotPreviewRenderer = screenshotPreviewRenderer;
         }
 
         public static AutoPicker Run(
+            StateConfig stateConfig,
+            StateDetector stateDetector,
             IUserConfiguration userConfiguration,
             IDetectionInfoConsumer detectionInfoConsumer,
             ScreenshotPreviewRenderer screenshotPreviewRenderer)
@@ -50,7 +57,8 @@
             perStateActionExecutor.RegisterAction(State.Pick, new PickStateActionExecutor(userConfiguration));
             perStateActionExecutor.RegisterAction(State.Selected, new SelectedStateActionExecutor());
 
-            AutoPicker autoPicker = new(new Config(), perStateActionExecutor, detectionInfoConsumer, screenshotPreviewRenderer);
+            AutoPicker autoPicker = new(
+                stateConfig, stateDetector, perStateActionExecutor, detectionInfoConsumer, screenshotPreviewRenderer);
             Task.Factory.StartNew(autoPicker.LoopThread, TaskCreationOptions.LongRunning);
 
             return autoPicker;
@@ -149,7 +157,7 @@
             if ((_windowManipulator == null) || (_lastWindowHandle != window) || (_lastWindowSize != currentWindowSize))
             {
                 _windowManipulator?.Dispose();
-                _windowManipulator = WindowManipulator.Create(window, _config, _screenshotPreviewRenderer);
+                _windowManipulator = WindowManipulator.Create(window, _stateDetector, _screenshotPreviewRenderer);
                 _lastWindowSize = currentWindowSize;
                 _lastWindowHandle = window;
             }
@@ -159,7 +167,7 @@
 
         private Task NextLoopDelay(State state)
         {
-            return Task.Delay(_config.RefreshRates[state]);
+            return Task.Delay(_stateConfig.PollingRates[state]);
         }
     }
 }

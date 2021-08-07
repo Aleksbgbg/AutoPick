@@ -27,6 +27,7 @@
                                                       ItemsSource="{Binding ViewLayouts}"
                                                       SelectedValue="{Binding ViewLayout}"/>
                                         </DockPanel>
+                                        <ContentControl util:View.Attach="{x:Type views:RunesView}"/>
                                     </StackPanel>
                                 </Setter.Value>
                             </Setter>
@@ -117,6 +118,7 @@
                                         <ContentControl util:View.Attach="{x:Type views:CalloutsView}"
                                                         HorizontalAlignment="Center"
                                                         Margin="0,5"/>
+                                        <ContentControl util:View.Attach="{x:Type views:RunesView}"/>
                                     </StackPanel>
                                 </Setter.Value>
                             </Setter>

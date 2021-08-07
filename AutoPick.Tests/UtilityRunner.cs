@@ -1,14 +1,21 @@
 ﻿namespace AutoPick.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
+    using System.IO;
+    using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
+    using AutoPick.Persistence;
+    using AutoPick.Runes;
     using AutoPick.WinApi.Native;
     using Emgu.CV;
     using Emgu.CV.CvEnum;
     using Emgu.CV.OCR;
     using Emgu.CV.Structure;
     using Xunit;
+    using Rune = AutoPick.Runes.Rune;
 
     // Utilities to help sourcing screenshots and testing features.
     // Ideally these utilities should be made into a utility program.
@@ -179,6 +186,168 @@
                                                          new Point(targetRegion.Width, targetRegion.Height)),
                                        new Rgb(Color.Red), 1);
             comparisonOutputImage.Save(outputPath);
+        }
+
+        [Theory()]
+        [InlineData(
+            @"A:\Downloads\dragontail-11.15.1\dragontail-11.15.1\11.15.1\data\en_GB\runesReforged.json",
+            @"A:\Programming\AutoPick\AutoPick\Data\Runes.bin")]
+        public void ParseRunes(string readLocation, string writeLocation)
+        {
+            string runesDataString = File.ReadAllText(readLocation);
+            RunesRead.Type[]? runesData = JsonSerializer.Deserialize<RunesRead.Type[]>(runesDataString);
+
+            RunesFile runesWrite = new();
+            List<RuneType> types = new();
+
+            foreach (RunesRead.Type? readType in runesData)
+            {
+                string typeName = readType.key;
+
+                RuneType writeType = new()
+                {
+                    Id = readType.id,
+                    Name = typeName,
+                    Icon = $"/Images/Runes/{typeName}/{typeName}.png"
+                };
+
+                List<RuneSlot> slots = new();
+
+                foreach (RunesRead.Slot readSlot in readType.slots)
+                {
+                    RuneSlot writeSlot = new();
+                    List<Rune> runes = new();
+
+                    foreach (RunesRead.Rune readRune in readSlot.runes)
+                    {
+                        Rune writeRune = new()
+                        {
+                            Id = readRune.id,
+                            Name = readRune.name,
+                            Description = ScrubDescription(readRune.shortDesc),
+                            Icon = $"/Images/Runes/{typeName}/{Path.GetFileName(readRune.icon)}"
+                        };
+                        runes.Add(writeRune);
+                        // writeSlot.Runes.Add(writeRune);
+                    }
+
+                    writeSlot.Runes = runes.ToArray();
+
+                    // writeType.Slots.Add(writeSlot);
+                    slots.Add(writeSlot);
+                }
+
+                writeType.Slots = slots.ToArray();
+                types.Add(writeType);
+            }
+
+            runesWrite.Runes = types.ToArray();
+
+
+            using var f = File.OpenWrite(writeLocation);
+            new BinaryReadWriter<RunesFile>().Serialize(runesWrite, f);
+
+
+            // File.WriteAllText(writeLocation,  JsonSerializer.Serialize(runesWrite));
+        }
+
+        private string ScrubDescription(string description)
+        {
+            StringBuilder builder = new();
+
+            bool isInsideMarkup = false;
+
+            foreach (char c in description)
+            {
+                if (isInsideMarkup)
+                {
+                    if (c == '>')
+                    {
+                        isInsideMarkup = false;
+                    }
+                }
+                else
+                {
+                    if (c == '<')
+                    {
+                        isInsideMarkup = true;
+                    }
+                    else
+                    {
+                        builder.Append(c);
+                    }
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private class RunesRead
+        {
+            public class Rune
+            {
+                public int id { get; set; }
+
+                public string key { get; set; }
+
+                public string icon { get; set; }
+
+                public string name { get; set; }
+
+                public string shortDesc { get; set; }
+
+                public string longDesc { get; set; }
+            }
+
+            public class Slot
+            {
+                public Rune[] runes { get; set; }
+            }
+
+            public class Type
+            {
+                public int id { get; set; }
+
+                public string key { get; set; }
+
+                public string icon { get; set; }
+
+                public string name { get; set; }
+
+                public Slot[] slots { get; set; }
+            }
+        }
+
+        private class RunesWrite
+        {
+            public class Rune
+            {
+                public int Id { get; set; }
+
+                public string Name { get; set; }
+
+                public string Icon { get; set; }
+
+                public string Description { get; set; }
+            }
+
+            public class Slot
+            {
+                public List<Rune> Runes { get; } = new();
+            }
+
+            public class Type
+            {
+                public int Id { get; set; }
+
+                public string Name { get; set; }
+
+                public string Icon { get; set; }
+
+                public List<Slot> Slots { get; } = new();
+            }
+
+            public List<Type> Runes { get; } = new();
         }
     }
 }

@@ -1,10 +1,6 @@
 ﻿namespace AutoPick.Converters
 {
-    using System;
-    using System.Globalization;
-    using System.Windows.Data;
-
-    public class LaneImageConverter : IValueConverter
+    public class LaneImageConverter : OneWayConverterBase<Lane>
     {
         private readonly LaneImageFetcher _laneImageFetcher;
 
@@ -13,14 +9,9 @@
             _laneImageFetcher = laneImageFetcher;
         }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        private protected override object ConvertValue(Lane value)
         {
-            return _laneImageFetcher.ImageForLane((Lane)value);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            return _laneImageFetcher.ImageForLane(value);
         }
     }
 }

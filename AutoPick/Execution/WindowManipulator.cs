@@ -95,7 +95,8 @@
             return (windowSize.Width >= 1024) && (windowSize.Height >= 576);
         }
 
-        public static WindowManipulator Create(IntPtr window, Config config,
+        public static WindowManipulator Create(IntPtr window,
+                                               StateDetector stateDetector,
                                                ScreenshotPreviewRenderer screenshotPreviewRenderer)
         {
             Size windowSize = GetWindowSize(window);
@@ -111,7 +112,7 @@
             return new WindowManipulator(
                 new ClickPoints(windowSize),
                 new ScreenshotGenerator(windowSize, screenshotPreviewRenderer),
-                new StateDetector(config),
+                stateDetector,
                 window,
                 targetDeviceContext,
                 bitmapHandle);

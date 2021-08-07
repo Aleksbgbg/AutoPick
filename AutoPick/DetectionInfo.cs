@@ -6,6 +6,10 @@
 
     public class DetectionInfo
     {
+        public DetectionInfo() : this(State.NotLaunched, Size.Empty)
+        {
+        }
+
         public DetectionInfo(State state, Size windowSize)
         {
             WindowAvailable = state.IsWindowAvailable();

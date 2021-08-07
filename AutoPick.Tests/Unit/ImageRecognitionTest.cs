@@ -2,6 +2,7 @@
 {
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Reflection;
     using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
     using AutoPick.StateDetection.Imaging;
@@ -9,7 +10,8 @@
 
     public class ImageRecognitionTest
     {
-        private readonly StateDetector _stateDetector = new(new Config());
+        private readonly StateDetector _stateDetector
+            = new(new AssemblyDataReader(Assembly.GetAssembly(typeof(StateDetector))), new StateConfig());
 
         [Theory]
         [MemberData(nameof(TestImages.BasicScreens), MemberType = typeof(TestImages))]
@@ -42,7 +44,8 @@
         {
             using Bitmap bitmap = (Bitmap)Image.FromFile(path);
             Bitmap snapshot = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-            using (Graphics graphics = Graphics.FromImage(snapshot)) {
+            using (Graphics graphics = Graphics.FromImage(snapshot))
+            {
                 graphics.DrawImage(bitmap, new Rectangle(0, 0, snapshot.Width, snapshot.Height));
             }
 

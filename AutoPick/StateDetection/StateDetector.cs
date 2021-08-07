@@ -4,16 +4,18 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using AutoPick.StateDetection.Definition;
     using AutoPick.StateDetection.Imaging;
 
     public class StateDetector
     {
+        private readonly AssemblyDataReader _assemblyDataReader;
+
         private readonly IImageRecogniser[] _imageRecognisers;
 
-        public StateDetector(Config config)
+        public StateDetector(AssemblyDataReader assemblyDataReader, StateConfig config)
         {
+            _assemblyDataReader = assemblyDataReader;
             _imageRecognisers = GetDetectors(config).OrderBy(detector => detector.ZOrder)
                                                     .SelectMany(detector => detector.Recognisers)
                                                     .ToArray();
@@ -32,7 +34,7 @@
             return State.Idle;
         }
 
-        private static IEnumerable<DetectorInfo> GetDetectors(Config config)
+        private IEnumerable<DetectorInfo> GetDetectors(StateConfig config)
         {
             Dictionary<State, DetectorInfo> detectorsPerState =
                 config.StateMatchers
@@ -63,12 +65,12 @@
             return detectorsPerState.Values.Concat(combinedDetectors);
         }
 
-        private static IEnumerable<IImageRecogniser> CreateMultipleImageRecognisers(State state, Detector[] detectors)
+        private IEnumerable<IImageRecogniser> CreateMultipleImageRecognisers(State state, Detector[] detectors)
         {
             return detectors.Select(detector => CreateImageRecogniser(state, detector));
         }
 
-        private static IImageRecogniser CreateImageRecogniser(State state, Detector detector)
+        private IImageRecogniser CreateImageRecogniser(State state, Detector detector)
         {
             return detector.SearchAlgorithm switch
             {
@@ -80,16 +82,9 @@
             };
         }
 
-        private static ITemplate LoadTemplate(string name)
+        private ITemplate LoadTemplate(string name)
         {
-            using Stream? stream = Assembly.GetExecutingAssembly()
-                                           .GetManifestResourceStream($"AutoPick.Images.Detection.{name}");
-
-            if (stream == null)
-            {
-                throw new InvalidOperationException($"Could not find detection image {name}");
-            }
-
+            using Stream stream = _assemblyDataReader.Read($"AutoPick.Images.Detection.{name}");
             return ImageFactory.TemplateFromStream(stream);
         }
 

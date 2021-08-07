@@ -7,10 +7,11 @@
 
     public class MainViewModel : ViewModelBase, IUserConfiguration, IDetectionInfoConsumer
     {
-        public MainViewModel(BitmapSource screenshotPreviewSource, Champion[] champions)
+        public MainViewModel(BitmapSource screenshotPreviewSource, Champion[] champions, RuneTreeViewModel[] runesTrees)
         {
             ScreenshotPreviewSource = screenshotPreviewSource;
             Champions = champions;
+            RuneTrees = runesTrees;
             _selectedChampion = champions[0];
         }
 
@@ -94,6 +95,8 @@
                 NotifyPropertyChanged();
             }
         }
+
+        public RuneTreeViewModel[] RuneTrees { get; }
 
         Lane IUserConfiguration.Lane => SelectedLane;
 

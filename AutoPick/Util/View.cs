@@ -4,6 +4,11 @@
     using System.Collections.Generic;
     using System.Windows;
     using System.Windows.Controls;
+    using AutoPick.ViewModels;
+    using Microsoft.Xaml.Behaviors;
+    using Microsoft.Xaml.Behaviors.Core;
+    using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
+    using Interaction = Microsoft.Xaml.Behaviors.Interaction;
 
     public static class View
     {
@@ -18,10 +23,23 @@
             "Attach",
             typeof(Type),
             typeof(View),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, PropertyChangedCallback)
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AttachChanged)
         );
 
-        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty ModelProperty = DependencyProperty.RegisterAttached(
+            "Model",
+            typeof(ViewModelBase),
+            typeof(View),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, ModelChanged)
+        );
+
+        public static readonly DependencyProperty ActionProperty = DependencyProperty.RegisterAttached(
+            "Action",
+            typeof(Action),
+            typeof(View),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, ActionChanged));
+
+        private static void AttachChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             d.SetValue(ContentControl.ContentProperty, ViewFactories[(Type)e.NewValue]());
         }
@@ -34,6 +52,45 @@
         public static Type GetAttach(ContentControl element)
         {
             return (Type)element.GetValue(AttachProperty);
+        }
+
+        private static void ModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(FrameworkElement.DataContextProperty, e.NewValue);
+        }
+
+        public static void SetModel(ContentControl element, ViewModelBase value)
+        {
+            element.SetValue(AttachProperty, value);
+        }
+
+        public static ViewModelBase GetModel(ContentControl element)
+        {
+            return (ViewModelBase)element.GetValue(AttachProperty);
+        }
+
+        private static void ActionChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs eventArgs)
+        {
+            EventTrigger eventTrigger = new("MouseDown")
+            {
+                SourceObject = dependencyObject
+            };
+            eventTrigger.Actions.Add(new InvokeCommandAction
+            {
+                Command = new ActionCommand((Action)eventArgs.NewValue)
+            });
+
+            Interaction.GetTriggers(dependencyObject).Add(eventTrigger);
+        }
+
+        public static void SetAction(FrameworkElement element, Action value)
+        {
+            element.SetValue(AttachProperty, value);
+        }
+
+        public static Action GetAction(FrameworkElement element)
+        {
+            return (Action)element.GetValue(ActionProperty);
         }
     }
 }

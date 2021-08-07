@@ -1,13 +1,10 @@
 ﻿namespace AutoPick.Converters
 {
-    using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
-    using System.Windows.Data;
     using AutoPick.StateDetection.Definition;
 
-    public class InfoTextConverter : IValueConverter
+    public class InfoTextConverter : OneWayConverterBase<State>
     {
         private readonly Dictionary<State, string> _infoTextPerState;
 
@@ -18,14 +15,9 @@
                 display => display.InfoText);
         }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        private protected override object ConvertValue(State value)
         {
-            return _infoTextPerState[(State)value];
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            return _infoTextPerState[value];
         }
     }
 }

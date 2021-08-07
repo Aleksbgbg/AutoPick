@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="AutoPick.Views.RunesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:util="clr-namespace:AutoPick.Util"
+             xmlns:views="clr-namespace:AutoPick.Views"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BitmapImage x:Key="Domination" UriSource="/Images/Runes/Domination/Domination.png"/>
+        <BitmapImage x:Key="DarkHarvest" UriSource="/Images/Runes/Domination/Keystones/DarkHarvest.png"/>
+        <BitmapImage x:Key="Electrocute" UriSource="/Images/Runes/Domination/Keystones/Electrocute.png"/>
+        <BitmapImage x:Key="HailOfBlades" UriSource="/Images/Runes/Domination/Keystones/HailOfBlades.png"/>
+        <BitmapImage x:Key="Predator" UriSource="/Images/Runes/Domination/Keystones/Predator.png"/>
+        <BitmapImage x:Key="CheapShot" UriSource="/Images/Runes/Domination/Slots/CheapShot.png"/>
+        <BitmapImage x:Key="EyeballCollection" UriSource="/Images/Runes/Domination/Slots/EyeballCollection.png"/>
+        <BitmapImage x:Key="GhostPoro" UriSource="/Images/Runes/Domination/Slots/GhostPoro.png"/>
+        <BitmapImage x:Key="GreenTerror_TasteOfBlood" UriSource="/Images/Runes/Domination/Slots/GreenTerror_TasteOfBlood.png"/>
+        <BitmapImage x:Key="IngeniousHunter" UriSource="/Images/Runes/Domination/Slots/IngeniousHunter.png"/>
+        <BitmapImage x:Key="RavenousHunter" UriSource="/Images/Runes/Domination/Slots/RavenousHunter.png"/>
+        <BitmapImage x:Key="RelentlessHunter" UriSource="/Images/Runes/Domination/Slots/RelentlessHunter.png"/>
+        <BitmapImage x:Key="SuddenImpact" UriSource="/Images/Runes/Domination/Slots/SuddenImpact.png"/>
+        <BitmapImage x:Key="UltimateHunter" UriSource="/Images/Runes/Domination/Slots/UltimateHunter.png"/>
+        <BitmapImage x:Key="ZombieWard" UriSource="/Images/Runes/Domination/Slots/ZombieWard.png"/>
+
+        <BitmapImage x:Key="Inspiration" UriSource="/Images/Runes/Inspiration/Inspiration.png"/>
+        <BitmapImage x:Key="GlacialAugment" UriSource="/Images/Runes/Inspiration/Keystones/GlacialAugment.png"/>
+        <BitmapImage x:Key="MasterKey" UriSource="/Images/Runes/Inspiration/Keystones/MasterKey.png"/>
+        <BitmapImage x:Key="UnsealedSpellbook" UriSource="/Images/Runes/Inspiration/Keystones/UnsealedSpellbook.png"/>
+        <BitmapImage x:Key="ApproachVelocity" UriSource="/Images/Runes/Inspiration/Slots/ApproachVelocity.png"/>
+        <BitmapImage x:Key="BiscuitDelivery" UriSource="/Images/Runes/Inspiration/Slots/BiscuitDelivery.png"/>
+        <BitmapImage x:Key="CosmicInsight" UriSource="/Images/Runes/Inspiration/Slots/CosmicInsight.png"/>
+        <BitmapImage x:Key="FuturesMarket" UriSource="/Images/Runes/Inspiration/Slots/FuturesMarket.png"/>
+        <BitmapImage x:Key="HextechFlashtraption" UriSource="/Images/Runes/Inspiration/Slots/HextechFlashtraption.png"/>
+        <BitmapImage x:Key="MagicalFootwear" UriSource="/Images/Runes/Inspiration/Slots/MagicalFootwear.png"/>
+        <BitmapImage x:Key="MinionDematerializer" UriSource="/Images/Runes/Inspiration/Slots/MinionDematerializer.png"/>
+        <BitmapImage x:Key="PerfectTiming" UriSource="/Images/Runes/Inspiration/Slots/PerfectTiming.png"/>
+        <BitmapImage x:Key="TimeWarpTonic" UriSource="/Images/Runes/Inspiration/Slots/TimeWarpTonic.png"/>
+
+        <BitmapImage x:Key="Precision" UriSource="/Images/Runes/Precision/Precision.png"/>
+        <BitmapImage x:Key="Conqueror" UriSource="/Images/Runes/Precision/Keystones/Conqueror.png"/>
+        <BitmapImage x:Key="FleetFootwork" UriSource="/Images/Runes/Precision/Keystones/FleetFootwork.png"/>
+        <BitmapImage x:Key="LethalTempoTemp" UriSource="/Images/Runes/Precision/Keystones/LethalTempoTemp.png"/>
+        <BitmapImage x:Key="PressTheAttack" UriSource="/Images/Runes/Precision/Keystones/PressTheAttack.png"/>
+        <BitmapImage x:Key="CoupDeGrace" UriSource="/Images/Runes/Precision/Slots/CoupDeGrace.png"/>
+        <BitmapImage x:Key="CutDown" UriSource="/Images/Runes/Precision/Slots/CutDown.png"/>
+        <BitmapImage x:Key="LastStand" UriSource="/Images/Runes/Precision/Slots/LastStand.png"/>
+        <BitmapImage x:Key="LegendAlacrity" UriSource="/Images/Runes/Precision/Slots/LegendAlacrity.png"/>
+        <BitmapImage x:Key="LegendBloodline" UriSource="/Images/Runes/Precision/Slots/LegendBloodline.png"/>
+        <BitmapImage x:Key="LegendTenacity" UriSource="/Images/Runes/Precision/Slots/LegendTenacity.png"/>
+        <BitmapImage x:Key="Overheal" UriSource="/Images/Runes/Precision/Slots/Overheal.png"/>
+        <BitmapImage x:Key="PresenceOfMind" UriSource="/Images/Runes/Precision/Slots/PresenceOfMind.png"/>
+        <BitmapImage x:Key="Triumph" UriSource="/Images/Runes/Precision/Slots/Triumph.png"/>
+
+        <BitmapImage x:Key="Resolve" UriSource="/Images/Runes/Resolve/Resolve.png"/>
+        <BitmapImage x:Key="GraspOfTheUndying" UriSource="/Images/Runes/Resolve/Keystones/GraspOfTheUndying.png"/>
+        <BitmapImage x:Key="Guardian" UriSource="/Images/Runes/Resolve/Keystones/Guardian.png"/>
+        <BitmapImage x:Key="VeteranAftershock" UriSource="/Images/Runes/Resolve/Keystones/VeteranAftershock.png"/>
+        <BitmapImage x:Key="BonePlating" UriSource="/Images/Runes/Resolve/Slots/BonePlating.png"/>
+        <BitmapImage x:Key="Conditioning" UriSource="/Images/Runes/Resolve/Slots/Conditioning.png"/>
+        <BitmapImage x:Key="Demolish" UriSource="/Images/Runes/Resolve/Slots/Demolish.png"/>
+        <BitmapImage x:Key="FontOfLife" UriSource="/Images/Runes/Resolve/Slots/FontOfLife.png"/>
+        <BitmapImage x:Key="MirrorShell" UriSource="/Images/Runes/Resolve/Slots/MirrorShell.png"/>
+        <BitmapImage x:Key="Overgrowth" UriSource="/Images/Runes/Resolve/Slots/Overgrowth.png"/>
+        <BitmapImage x:Key="Revitalize" UriSource="/Images/Runes/Resolve/Slots/Revitalize.png"/>
+        <BitmapImage x:Key="SecondWind" UriSource="/Images/Runes/Resolve/Slots/SecondWind.png"/>
+        <BitmapImage x:Key="Unflinching" UriSource="/Images/Runes/Resolve/Slots/Unflinching.png"/>
+
+        <BitmapImage x:Key="Sorcery" UriSource="/Images/Runes/Sorcery/Sorcery.png"/>
+        <BitmapImage x:Key="ArcaneComet" UriSource="/Images/Runes/Sorcery/Keystones/ArcaneComet.png"/>
+        <BitmapImage x:Key="PhaseRush" UriSource="/Images/Runes/Sorcery/Keystones/PhaseRush.png"/>
+        <BitmapImage x:Key="SummonAery" UriSource="/Images/Runes/Sorcery/Keystones/SummonAery.png"/>
+        <BitmapImage x:Key="AbsoluteFocus" UriSource="/Images/Runes/Sorcery/Slots/AbsoluteFocus.png"/>
+        <BitmapImage x:Key="CelerityTemp" UriSource="/Images/Runes/Sorcery/Slots/CelerityTemp.png"/>
+        <BitmapImage x:Key="GatheringStorm" UriSource="/Images/Runes/Sorcery/Slots/GatheringStorm.png"/>
+        <BitmapImage x:Key="ManaflowBand" UriSource="/Images/Runes/Sorcery/Slots/ManaflowBand.png"/>
+        <BitmapImage x:Key="NimbusCloak" UriSource="/Images/Runes/Sorcery/Slots/NimbusCloak.png"/>
+        <BitmapImage x:Key="Pokeshield" UriSource="/Images/Runes/Sorcery/Slots/Pokeshield.png"/>
+        <BitmapImage x:Key="Scorch" UriSource="/Images/Runes/Sorcery/Slots/Scorch.png"/>
+        <BitmapImage x:Key="Transcendence" UriSource="/Images/Runes/Sorcery/Slots/Transcendence.png"/>
+        <BitmapImage x:Key="Waterwalking" UriSource="/Images/Runes/Sorcery/Slots/Waterwalking.png"/>
+    </UserControl.Resources>
+    <ItemsControl ItemsSource="{Binding RuneTrees}">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <ContentControl util:View.Attach="{x:Type views:RuneTreeView}" util:View.Model="{Binding}"/>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
+</UserControl>
