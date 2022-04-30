@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using AutoPick.Runes;
     using AutoPick.ViewModels;
     using Microsoft.Xaml.Behaviors;
     using Microsoft.Xaml.Behaviors.Core;
@@ -35,7 +37,7 @@
 
         public static readonly DependencyProperty ActionProperty = DependencyProperty.RegisterAttached(
             "Action",
-            typeof(Action),
+            typeof(object),
             typeof(View),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, ActionChanged));
 
@@ -69,28 +71,56 @@
             return (ViewModelBase)element.GetValue(AttachProperty);
         }
 
+        public static IRuneSelector RS = null;
+
         private static void ActionChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs eventArgs)
         {
-            EventTrigger eventTrigger = new("MouseDown")
+            if (eventArgs.NewValue is string s)
             {
-                SourceObject = dependencyObject
-            };
-            eventTrigger.Actions.Add(new InvokeCommandAction
-            {
-                Command = new ActionCommand((Action)eventArgs.NewValue)
-            });
+                Rune rune = (Rune)((FrameworkElement)dependencyObject).DataContext;
 
-            Interaction.GetTriggers(dependencyObject).Add(eventTrigger);
+                // var match = Regex.Match(s, @"(.+)\((.+)\)");
+                //
+                // string func = match.Groups[1].Value;
+                //
+                // var prop = dependencyObject.GetType().GetProperty(func);
+                // Action<object> f = (Action<object>)prop.GetValue(dependencyObject);
+                //
+                //
+                EventTrigger eventTrigger = new("MouseDown")
+                {
+                    SourceObject = dependencyObject
+                };
+                eventTrigger.Actions.Add(new InvokeCommandAction
+                {
+                    Command = new ActionCommand(() => RS.PickRune(rune))
+                });
+
+                Interaction.GetTriggers(dependencyObject).Add(eventTrigger);
+            }
+            else
+            {
+                EventTrigger eventTrigger = new("MouseDown")
+                {
+                    SourceObject = dependencyObject
+                };
+                eventTrigger.Actions.Add(new InvokeCommandAction
+                {
+                    Command = new ActionCommand((Action)eventArgs.NewValue)
+                });
+
+                Interaction.GetTriggers(dependencyObject).Add(eventTrigger);
+            }
         }
 
-        public static void SetAction(FrameworkElement element, Action value)
+        public static void SetAction(FrameworkElement element, object value)
         {
             element.SetValue(AttachProperty, value);
         }
 
-        public static Action GetAction(FrameworkElement element)
+        public static object GetAction(FrameworkElement element)
         {
-            return (Action)element.GetValue(ActionProperty);
+            return element.GetValue(ActionProperty);
         }
     }
 }

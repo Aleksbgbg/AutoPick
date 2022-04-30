@@ -5,13 +5,15 @@
 
     public class RuneTreeViewModel : ViewModelBase
     {
-        public RuneTreeViewModel(RunePath runePath)
+        private readonly IRuneSelector _runeSelector;
+
+        public RuneTreeViewModel(RuneType runePath, IRuneSelector runeSelector)
         {
+            _runeSelector = runeSelector;
             RunePath = runePath;
-            _isSelected = runePath == RunePath.Sorcery;
         }
 
-        public RunePath RunePath { get; }
+        public RuneType RunePath { get; }
 
         private bool _isSelected;
         public bool IsSelected
@@ -30,6 +32,23 @@
             }
         }
 
-        public Action Select => () => IsSelected = true;
+        public Action Select => () =>
+        {
+            if (_isSelected)
+            {
+                _runeSelector.PickPrimaryKeyStone(RunePath);
+            }
+            else
+            {
+                _runeSelector.PickSecondaryKeyStone(RunePath);
+            }
+
+            IsSelected = true;
+        };
+
+        public Action<Rune> SelectSmall => (rune) =>
+        {
+            _runeSelector.PickRune(rune);
+        };
     }
 }

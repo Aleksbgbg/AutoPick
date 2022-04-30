@@ -6,6 +6,6 @@
     {
         void Write(Stream stream, object value);
 
-        object Read(Stream stream);
+        object? Read(Stream stream);
     }
 }

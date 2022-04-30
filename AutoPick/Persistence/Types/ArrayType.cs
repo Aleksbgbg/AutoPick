@@ -28,7 +28,7 @@
             }
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
             int length = (int)_intType.Read(stream);
             Array array = Array.CreateInstance(_elementType, length);

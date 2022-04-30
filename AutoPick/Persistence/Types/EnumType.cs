@@ -20,7 +20,7 @@
             _underlyingTypeReadWriteable.Write(stream, value);
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
             object read = _underlyingTypeReadWriteable.Read(stream);
             return Enum.ToObject(_enumType, read);

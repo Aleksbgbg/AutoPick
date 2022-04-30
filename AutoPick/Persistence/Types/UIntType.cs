@@ -13,7 +13,7 @@
             stream.WriteByte((byte)((value >> 24) & 255));
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
             int byte0 = stream.ReadByte();
             int byte1 = stream.ReadByte();

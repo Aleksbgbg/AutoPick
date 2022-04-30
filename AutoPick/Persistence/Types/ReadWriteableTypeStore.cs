@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
+    using System.Text;
 
     public class ReadWriteableTypeStore
     {
@@ -22,22 +24,31 @@
                 [typeof(int?)] = _intType,
                 [typeof(uint)] = uIntType,
                 [typeof(uint?)] = uIntType,
-                [typeof(string)] = new StringType(_intType),
             };
         }
 
-        public bool ContainsTypeFor(Type type)
+        public bool ContainsSimpleType(Type type)
         {
-            return GetReadWriteable(type) != null;
+            return _readWriteableTypes.ContainsKey(type);
         }
 
-        public IReadWriteableType ReadWriteableFor(Type type)
+        public bool ContainsTypeForProperty(Type type, PropertyInfo property)
         {
-            IReadWriteableType? readWriteableType = GetReadWriteable(type);
+            return GetReadWriteable(type, property) != null;
+        }
+
+        public IReadWriteableType SimpleReadWriteable(Type type)
+        {
+            return _readWriteableTypes[type];
+        }
+
+        public IReadWriteableType PropertyReadWriteable(Type type, PropertyInfo property)
+        {
+            IReadWriteableType? readWriteableType = GetReadWriteable(type, property);
 
             if (readWriteableType == null)
             {
-                throw new InvalidOperationException($"No IReadWriteableType for {type.Name}.");
+                throw new InvalidOperationException($"No IReadWriteableType for {property.PropertyType.Name}.");
             }
 
             return readWriteableType;
@@ -48,17 +59,23 @@
             _readWriteableTypes.Add(type, readWriteableType);
         }
 
-        private IReadWriteableType? GetReadWriteable(Type type)
+        private IReadWriteableType? GetReadWriteable(Type type, PropertyInfo property)
         {
             if (_readWriteableTypes.ContainsKey(type))
             {
                 return _readWriteableTypes[type];
             }
 
+            if (type == typeof(string))
+            {
+                EncodingAttribute? encoding = property.GetCustomAttribute<EncodingAttribute>();
+                return new StringType(_intType, encoding?.Encoding ?? EncodingAttribute.DefaultEncoding);
+            }
+
             if (type.IsArray)
             {
                 Type elementType = type.GetElementType();
-                return new ArrayType(elementType, _intType, ReadWriteableFor(elementType));
+                return new ArrayType(elementType, _intType, PropertyReadWriteable(elementType, property));
             }
 
             Type? nullableUnderlyingType = Nullable.GetUnderlyingType(type);
@@ -71,7 +88,7 @@
             if (nullableUnderlyingType.IsEnum)
             {
                 Type enumUnderlyingType = nullableUnderlyingType.GetEnumUnderlyingType();
-                return new EnumType(nullableUnderlyingType, ReadWriteableFor(enumUnderlyingType));
+                return new EnumType(nullableUnderlyingType, PropertyReadWriteable(enumUnderlyingType, property));
             }
 
             return null;

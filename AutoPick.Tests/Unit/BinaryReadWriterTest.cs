@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Text;
     using AutoPick.Persistence;
     using Xunit;
 
@@ -98,12 +99,44 @@
         }
 
         [Fact]
-        public void SerializesString()
+        public void SerializesUtf8String()
         {
-            BinaryReadWriter<StringData> binaryReadWriter = new();
+            BinaryReadWriter<Utf8StringData> binaryReadWriter = new();
             MemoryStream memoryStream = new();
 
-            binaryReadWriter.Serialize(new StringData { Value = "abcdef" }, memoryStream);
+            binaryReadWriter.Serialize(new Utf8StringData { Value = "abcdef" }, memoryStream);
+
+            Assert.Equal(new byte[]
+            {
+                // Field index
+                255, 255,
+                // Byte length
+                6, 0, 0, 0,
+                // UTF-8 encoded string
+                97, 98, 99, 100, 101, 102
+            }, memoryStream.ToArray());
+        }
+
+        [Fact]
+        public void DeserializesUtf8String()
+        {
+            BinaryReadWriter<Utf8StringData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+            binaryReadWriter.Serialize(new Utf8StringData { Value = "hello" }, memoryStream);
+            memoryStream.Position = 0;
+
+            Utf8StringData data = binaryReadWriter.Deserialize(memoryStream);
+
+            Assert.Equal("hello", data.Value);
+        }
+
+        [Fact]
+        public void SerializesUtf16String()
+        {
+            BinaryReadWriter<Utf16StringData> binaryReadWriter = new();
+            MemoryStream memoryStream = new();
+
+            binaryReadWriter.Serialize(new Utf16StringData { Value = "abcdef" }, memoryStream);
 
             Assert.Equal(new byte[]
             {
@@ -117,14 +150,14 @@
         }
 
         [Fact]
-        public void DeserializesString()
+        public void DeserializesUtf16String()
         {
-            BinaryReadWriter<StringData> binaryReadWriter = new();
+            BinaryReadWriter<Utf16StringData> binaryReadWriter = new();
             MemoryStream memoryStream = new();
-            binaryReadWriter.Serialize(new StringData { Value = "hello" }, memoryStream);
+            binaryReadWriter.Serialize(new Utf16StringData { Value = "hello" }, memoryStream);
             memoryStream.Position = 0;
 
-            StringData data = binaryReadWriter.Deserialize(memoryStream);
+            Utf16StringData data = binaryReadWriter.Deserialize(memoryStream);
 
             Assert.Equal("hello", data.Value);
         }
@@ -175,9 +208,9 @@
                 // Field index
                 2, 0,
                 // String length
-                12, 0, 0, 0,
+                6, 0, 0, 0,
                 // String
-                72, 0, 101, 0, 108, 0, 108, 0, 111, 0, 33, 0,
+                72, 101, 108, 108, 111, 33,
                 // Field index
                 3, 0,
                 // Enum
@@ -191,9 +224,9 @@
                 // Field index
                 2, 0,
                 // String length
-                12, 0, 0, 0,
+                6, 0, 0, 0,
                 // String
-                33, 0, 111, 0, 108, 0, 108, 0, 101, 0, 72, 0,
+                33, 111, 108, 108, 101, 72,
                 // Field index
                 3, 0,
                 // Enum
@@ -202,7 +235,7 @@
         }
 
         [Fact]
-        public void DeserializesArrayData()
+        public void DeserializesArray()
         {
             BinaryReadWriter<ArrayData> binaryReadWriter = new();
             MemoryStream memoryStream = new();
@@ -234,10 +267,10 @@
             Assert.Equal(12, data.Array[0].Int);
             Assert.Equal("Hello!", data.Array[0].String);
             Assert.Equal(Enum.B, data.Array[0].Enum);
-            Assert.Equal(false, data.Array[0].Bool);
-            Assert.Equal(null, data.Array[0].Int);
-            Assert.Equal("!olleH", data.Array[0].String);
-            Assert.Equal(Enum.C, data.Array[0].Enum);
+            Assert.Equal(false, data.Array[1].Bool);
+            Assert.Equal(null, data.Array[1].Int);
+            Assert.Equal("!olleH", data.Array[1].String);
+            Assert.Equal(Enum.C, data.Array[1].Enum);
         }
 
         [Fact]
@@ -329,9 +362,9 @@
                 // Field index
                 2, 0,
                 // String length
-                12, 0, 0, 0,
+                6, 0, 0, 0,
                 // String
-                72, 0, 101, 0, 108, 0, 108, 0, 111, 0, 33, 0,
+                72, 101, 108, 108, 111, 33,
                 // Field index
                 3, 0,
                 // Enum
@@ -452,13 +485,6 @@
             0, 0,
             // Invalid bool (not 0 or 1)
             2
-        })]
-        [InlineData(new byte[] // Int
-        {
-            // Field index
-            1, 0,
-            // Invalid int (too short)
-            0, 0, 1
         })]
         [InlineData(new byte[] // String
         {
@@ -583,8 +609,16 @@
             public Enum? Value { get; set; }
         }
 
-        private class StringData
+        private class Utf8StringData
         {
+            [Encoding(EncodingType.Utf8)]
+            [FieldIndex(ushort.MaxValue)]
+            public string? Value { get; set; }
+        }
+
+        private class Utf16StringData
+        {
+            [Encoding(EncodingType.Utf16)]
             [FieldIndex(ushort.MaxValue)]
             public string? Value { get; set; }
         }

@@ -9,6 +9,7 @@
         private class Data
         {
             [FieldIndex(0)]
+            [Encoding(EncodingType.Utf16)]
             public string? SelectedChampionName { get; set; }
 
             [FieldIndex(2)]

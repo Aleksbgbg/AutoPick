@@ -13,8 +13,13 @@
             stream.WriteByte((byte)((value >> 24) & 255));
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
+            if ((stream.Length - stream.Position) < 4)
+            {
+                return null;
+            }
+
             int byte0 = stream.ReadByte();
             int byte1 = stream.ReadByte();
             int byte2 = stream.ReadByte();

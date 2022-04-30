@@ -31,6 +31,8 @@
         <Resource Include="Images\Icons\**" />
         <Resource Include="Images\Lanes\**" />
         <Resource Include="Images\Runes\**" />
+        <None Remove="Data\Runes.bin" />
+        <EmbeddedResource Include="Data\Runes.bin" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Data" />

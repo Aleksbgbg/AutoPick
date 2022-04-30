@@ -3,11 +3,13 @@
     using System;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Media.Imaging;
     using AutoPick.Converters;
     using AutoPick.DebugTools;
     using AutoPick.Execution;
+    using AutoPick.LcuApi;
     using AutoPick.Runes;
     using AutoPick.StateDetection;
     using AutoPick.StateDetection.Definition;
@@ -47,13 +49,23 @@
             ErrorReporting.Init();
         #endif
 
+            SelectedRunesStore runesStore = new();
+            View.RS = runesStore;
+
+            Task.Delay(10_000).ContinueWith(async (t) =>
+            {
+                await Client.Create(runesStore);
+            });
+
             await ChampionStore.LoadChampionsIfNecessary();
 
+            AssemblyDataReader assemblyDataReader = new(Assembly.GetExecutingAssembly());
             WriteableBitmap screenshotRenderSurface = ImageFactory.CreateScreenshotRenderSurface();
             ChampionStore championStore = new();
             LaneImageFetcher laneImageFetcher = new();
-            MainViewModel mainViewModel = new(screenshotRenderSurface, championStore.Champions, Enum.GetValues<RunePath>().Select(value => new RuneTreeViewModel(value)).ToArray());
-            RunesViewModel runesViewModel = new();
+            MainViewModel mainViewModel = new(screenshotRenderSurface, championStore.Champions);
+            RunesConfig runesConfig = new(assemblyDataReader);
+            RunesViewModel runesViewModel = new(runesConfig.RuneTypes.Select(type => new RuneTreeViewModel(type, runesStore)).ToArray());
             _dataStore = new DiskDataStore(mainViewModel, championStore);
 
             _dataStore.Load();
@@ -64,6 +76,7 @@
             LaneImageConverter laneImageConverter = new(laneImageFetcher);
             InfoTextConverter infoTextConverter = new(stateConfig.StateInfoDisplays);
             InfoIconConverter infoIconConverter = new(stateConfig.StateInfoDisplays);
+            RunePathToImageConverter runePathToImageConverter = new();
 
             View.Register(() => new CalloutsView(championImageConverter, laneImageConverter)
             {
@@ -77,8 +90,6 @@
             {
                 DataContext = runesViewModel
             });
-
-            RunePathToImageConverter runePathToImageConverter = new();
             View.Register(() => new RuneTreeView(runePathToImageConverter));
 
             MainWindow mainWindow = new()
@@ -90,7 +101,7 @@
             ScreenshotPreviewRenderer screenshotPreviewRenderer = new(screenshotRenderSurface);
             AutoPicker autoPicker = AutoPicker.Run(
                 stateConfig,
-                new StateDetector(new AssemblyDataReader(Assembly.GetExecutingAssembly()), stateConfig),
+                new StateDetector(assemblyDataReader, stateConfig),
                 mainViewModel,
                 mainViewModel,
                 screenshotPreviewRenderer);

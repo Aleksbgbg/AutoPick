@@ -23,8 +23,28 @@
         </Style>
     </UserControl.Resources>
 
-    <Image Style="{StaticResource RuneTreeImage}"
-           Source="{Binding RunePath, Converter={StaticResource RunePathToImageConverter}}"
-           util:View.Action="{Binding Select}"
-           Cursor="Hand"/>
+    <StackPanel>
+        <Image Style="{StaticResource RuneTreeImage}"
+               Source="{Binding RunePath.Icon}"
+               util:View.Action="{Binding Select}"
+               Cursor="Hand"/>
+        <ItemsControl ItemsSource="{Binding RunePath.Slots}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Runes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Image Style="{StaticResource RuneTreeImage}" Source="{Binding Icon}" ToolTip="{Binding Description}" util:View.Action="SelectSmall(this)"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
 </UserControl>

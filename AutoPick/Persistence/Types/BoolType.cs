@@ -10,9 +10,21 @@
             stream.WriteByte((byte)(b ? 1 : 0));
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
-            return stream.ReadByte() == 1;
+            int value = stream.ReadByte();
+
+            if (value == 0)
+            {
+                return false;
+            }
+
+            if (value == 1)
+            {
+                return true;
+            }
+
+            return null;
         }
     }
 }

@@ -58,25 +58,25 @@
                                                           .Count(info => info.PropertyInfo.GetValue(value) != null));
         }
 
-        public object Read(Stream stream)
+        public object? Read(Stream stream)
         {
             object returnValue = Activator.CreateInstance(_type)!;
 
             HashSet<ushort> deserializedFields = new();
 
-            Func<bool> isFinishedPredicate;
+            Func<bool> isFinished;
 
             if (_isSubMessage)
             {
                 ushort fieldsSerialized = (ushort)_ushortReadWriteable.Read(stream);
-                isFinishedPredicate = () => fieldsSerialized > deserializedFields.Count;
+                isFinished = () => fieldsSerialized == deserializedFields.Count;
             }
             else
             {
-                isFinishedPredicate = () => stream.Position == stream.Length;
+                isFinished = () => stream.Position == stream.Length;
             }
 
-            while (!isFinishedPredicate())
+            while (!isFinished())
             {
                 ushort fieldIndex = (ushort)_ushortReadWriteable.Read(stream);
 
@@ -146,7 +146,7 @@
                     throw InvalidProperty(propertyInfo, "isn't writeable");
                 }
 
-                IReadWriteableType readWriteableType = GetReadWriteable(readWriteableTypeStore, propertyInfo.PropertyType);
+                IReadWriteableType readWriteableType = GetReadWriteable(readWriteableTypeStore, propertyInfo);
 
                 fieldSerializationInfoByIndex.Add(
                     fieldIndex, new PropertySerializationInfo(propertyInfo, readWriteableType));
@@ -155,25 +155,27 @@
             return new ComplexType(
                 isSubMessage,
                 type,
-                readWriteableTypeStore.ReadWriteableFor(typeof(ushort?)),
+                readWriteableTypeStore.SimpleReadWriteable(typeof(ushort?)),
                 fieldSerializationInfoByIndex);
         }
 
-        private static IReadWriteableType GetReadWriteable(ReadWriteableTypeStore types, Type type)
+        private static IReadWriteableType GetReadWriteable(ReadWriteableTypeStore types, PropertyInfo propertyInfo)
         {
+            Type type = propertyInfo.PropertyType;
+
             if (type.IsArray)
             {
                 Type elementType = type.GetElementType();
 
-                if (!types.ContainsTypeFor(elementType))
+                if (!types.ContainsTypeForProperty(elementType, propertyInfo))
                 {
                     types.AddReadWriteable(elementType, Create(elementType, types));
                 }
             }
 
-            if (types.ContainsTypeFor(type))
+            if (types.ContainsTypeForProperty(type, propertyInfo))
             {
-                return types.ReadWriteableFor(type);
+                return types.PropertyReadWriteable(type, propertyInfo);
             }
 
             IReadWriteableType readWriteableForType = Create(type, types);
